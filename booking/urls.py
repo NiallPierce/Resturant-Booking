@@ -1,7 +1,7 @@
-from django.urls import path
-
+from django.contrib import admin
+from django.urls import path, include
 
 urlpatterns = [
-    # Your booking app URLs here
-    # Example: path('bookings/', views.booking_list, name='booking_list'),
+    path('admin/', admin.site.urls),
+    path('', include('restaurant.urls')),
 ]

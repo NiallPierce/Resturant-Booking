@@ -19,4 +19,4 @@ def restaurant_list(request):
     print("Attempting to render template: restaurant_list.html")
     print("=== End Debug ===\n")
 
-    return render(request, 'restaurant_list.html', {'restaurants': restaurants})
+    return render(request, 'restaurant/restaurant_list.html', {'restaurants': restaurants})
