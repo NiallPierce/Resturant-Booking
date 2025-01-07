@@ -25,8 +25,12 @@ SECRET_KEY = 'django-insecure-azc3n28_*=kk#u47izxtq^itq73n!=q#gxmpa^b6**48ku0ptq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['8000-niallpierce-resturantbo-1v0kpx7i6yg.ws-us117.gitpod.io']
-
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    '*.gitpod.io',
+    '8000-niallpierce-resturantbo-rb3bpykd4gs.ws-us117.gitpod.io'
+]
 
 # Application definition
 
@@ -55,7 +59,7 @@ ROOT_URLCONF = 'booking.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'restaurant' / 'templates'],  # Add this line
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

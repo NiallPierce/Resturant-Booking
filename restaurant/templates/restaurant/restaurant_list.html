@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restaurants</title>
+</head>
+<body>
+    <h1>Restaurant List - Debug Version</h1>
+
+    <!-- Debug info -->
+    <p style="color: red;">If you can see this, the template is loading!</p>
+
+    <h2>Restaurants Found:</h2>
+    <ul>
+        {% if restaurants %}
+            {% for restaurant in restaurants %}
+                <li>{{ restaurant.name }} - {{ restaurant.address }}</li>
+            {% endfor %}
+        {% else %}
+            <li style="color: red;">No restaurants found (but we know one exists in DB!)</li>
+        {% endif %}
+    </ul>
+
+    <!-- More debug info -->
+    <p>Debug: Looking for restaurant named "The Gourmet Kitchen"</p>
+</body>
+</html>
