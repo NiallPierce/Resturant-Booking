@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .models import Restaurant
+from django import forms
 
 def restaurant_list(request):
     print("\n=== Restaurant List View Debug ===")
@@ -20,3 +21,13 @@ def restaurant_list(request):
     print("=== End Debug ===\n")
 
     return render(request, 'restaurant/restaurant_list.html', {'restaurants': restaurants})
+
+# Add new BookingForm class
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = ['date', 'time', 'number_of_guests', 'special_requests']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'time': forms.TimeInput(attrs={'type': 'time'}),
+        }
