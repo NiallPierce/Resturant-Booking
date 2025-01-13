@@ -1,28 +1,67 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
-# Model for Restaurant
+# Restaurant Model
 class Restaurant(models.Model):
-    name = models.CharField(max_length=100)  # Name of the restaurant
-    address = models.TextField()  # Address of the restaurant
-    contact_number = models.CharField(max_length=15)  # Contact phone number for the restaurant
-    opening_hours = models.CharField(max_length=100)  # Opening hours (e.g., "Mon-Fri: 9 AM - 9 PM")
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    opening_time = models.TimeField()
+    closing_time = models.TimeField()
+    capacity = models.IntegerField(default=50)
+    contact_number = models.CharField(max_length=20)
+    email = models.EmailField()
 
-    def __str__(self):
-        return self.name  # String representation of the restaurant
+    def str(self):
+        return self.name
 
-class Booking(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to Django's built-in User model
+# Table Model
+class Table(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    table_number = models.IntegerField()
+    capacity = models.IntegerField()
+    is_active = models.BooleanField(default=True)
+
+    def str(self):
+        return f"{self.restaurant.name} - Table {self.table_number} (Seats {self.capacity})"
+
+#TimeSlot Model
+class TimeSlot(models.Model):
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    is_available = models.BooleanField(default=True)
+
+    def str(self):
+        return f"{self.restaurant.name} - {self.start_time} to {self.end_time}"
+
+#Booking Model
+class Booking(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    table = models.ForeignKey(Table, on_delete=models.CASCADE, null=True, blank=True)  # Optional table assignment
+    time_slot = models.ForeignKey(TimeSlot, on_delete=models.CASCADE, null=True, blank=True)  # Optional time slot
     date = models.DateField()
     time = models.TimeField()
     number_of_guests = models.PositiveIntegerField()
     special_requests = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"Booking for {self.user.username} on {self.date} at {self.time}"
+    def str(self):
+        return f"Booking for {self.user.username} at {self.restaurant.name} on {self.date} at {self.time}"
 
+    class Meta:
+        ordering = ['-date', '-time']  # Orders bookings by date and time, most recent first
+
+#MenuItem Model
 class MenuItem(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
