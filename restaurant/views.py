@@ -1,5 +1,6 @@
-from django.shortcuts import render
-from .models import Restaurant
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Restaurant, MenuItem, Booking
 from django import forms
 
 def restaurant_list(request):
@@ -42,4 +43,35 @@ def restaurant_detail(request, restaurant_id):
     return render(request, 'restaurant/restaurant_detail.html', {
         'restaurant': restaurant,
         'menu_items': menu_items
+    })
+
+# Add booking view
+@login_required
+def book_restaurant(request, restaurant_id):
+    print("\n=== Restaurant Booking View Debug ===")
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+    print(f"Processing booking for restaurant: {restaurant.name}")
+    
+    if request.method == 'POST':
+        print("Processing POST request with booking data")
+        form = BookingForm(request.POST)
+        if form.is_valid():
+            print("Form is valid - creating booking")
+            booking = form.save(commit=False)
+            booking.user = request.user
+            booking.restaurant = restaurant
+            booking.save()
+            print(f"Booking created for user: {request.user.username}")
+            return redirect('restaurant_list')  # create a confirmation view
+        else:
+            print("Form validation failed")
+            print(f"Form errors: {form.errors}")
+    else:
+        print("Displaying empty booking form")
+        form = BookingForm()
+    
+    print("=== End Debug ===\n")
+    return render(request, 'restaurant/booking_form.html', {
+        'form': form,
+        'restaurant': restaurant
     })

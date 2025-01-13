@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="card-title">{{ restaurant.name }}</h1>
+                    <p class="text-muted">{{ restaurant.address }}</p>
+
+                    <div class="mb-4">
+                        <h5>Opening Hours</h5>
+                        <p>{{ restaurant.opening_time }} - {{ restaurant.closing_time }}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p>{{ restaurant.description }}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Menu Items</h5>
+                        <div class="list-group">
+                            {% for item in menu_items %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ item.name }}</h6>
+                                    <span>${{ item.price }}</span>
+                                </div>
+                                <p class="mb-1">{{ item.description }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <a href="{% url 'book_restaurant' restaurant.id %}" class="btn btn-primary">
+                        Book Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
