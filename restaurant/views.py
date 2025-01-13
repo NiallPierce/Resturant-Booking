@@ -31,3 +31,15 @@ class BookingForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'type': 'date'}),
             'time': forms.TimeInput(attrs={'type': 'time'}),
         }
+# Add restaurant detail view
+def restaurant_detail(request, restaurant_id):
+    print("\n=== Restaurant Detail View Debug ===")
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+    menu_items = MenuItem.objects.filter(restaurant=restaurant)
+    print(f"Showing details for restaurant: {restaurant.name}")
+    print(f"Found {menu_items.count()} menu items")
+    print("=== End Debug ===\n")
+    return render(request, 'restaurant/restaurant_detail.html', {
+        'restaurant': restaurant,
+        'menu_items': menu_items
+    })
