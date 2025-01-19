@@ -1,7 +1,9 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .models import Restaurant, MenuItem, Booking
 from django import forms
+from .forms import UserRegistrationForm
 
 def restaurant_list(request):
     print("\n=== Restaurant List View Debug ===")
@@ -75,3 +77,15 @@ def book_restaurant(request, restaurant_id):
         'form': form,
         'restaurant': restaurant
     })
+
+    def register(request):
+        if request.method == 'POST':
+            form = UserRegistrationForm(request.POST)
+            if form.is_valid():
+                form.save()
+                username = form.cleaned_data.get('username')
+                messages.success(request, f'Account created for {username}! You can now log in.')
+                return redirect('login')
+        else:
+            form = UserRegistrationForm()
+        return render(request, 'registration/register.html', {'form': form})
