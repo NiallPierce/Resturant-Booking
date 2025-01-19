@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
 from .models import Restaurant, MenuItem, Booking
 from django import forms
@@ -47,6 +48,20 @@ def restaurant_detail(request, restaurant_id):
         'menu_items': menu_items
     })
 
+def register(request):
+    # Initialize form variable outside the if block
+    form = UserRegistrationForm()
+
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created for {username}! You can now log in.')
+            return redirect('login')
+
+    return render(request, 'registration/register.html', {'form': form})
+
 # Add booking view
 @login_required
 def book_restaurant(request, restaurant_id):
@@ -77,15 +92,3 @@ def book_restaurant(request, restaurant_id):
         'form': form,
         'restaurant': restaurant
     })
-
-    def register(request):
-        if request.method == 'POST':
-            form = UserRegistrationForm(request.POST)
-            if form.is_valid():
-                form.save()
-                username = form.cleaned_data.get('username')
-                messages.success(request, f'Account created for {username}! You can now log in.')
-                return redirect('login')
-        else:
-            form = UserRegistrationForm()
-        return render(request, 'registration/register.html', {'form': form})

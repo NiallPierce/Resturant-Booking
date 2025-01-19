@@ -32,6 +32,10 @@ ALLOWED_HOSTS = [
     '8000-niallpierce-resturantbo-rb3bpykd4gs.ws-us117.gitpod.io'
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://8000-niallpierce-resturantbo-rb3bpykd4gs.ws-us117.gitpod.io/register'
+]
+
 # Application definition
 
 INSTALLED_APPS = [
