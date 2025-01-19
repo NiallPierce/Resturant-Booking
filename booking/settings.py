@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://8000-niallpierce-resturantbo-rb3bpykd4gs.ws-us117.gitpod.io/register'
+    'https://8000-niallpierce-resturantbo-rb3bpykd4gs.ws-us117.gitpod.io'
 ]
 
 # Application definition

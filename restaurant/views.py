@@ -32,9 +32,12 @@ class BookingForm(forms.ModelForm):
         model = Booking
         fields = ['date', 'time', 'number_of_guests', 'special_requests']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-            'time': forms.TimeInput(attrs={'type': 'time'}),
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'number_of_guests': forms.NumberInput(attrs={'class': 'form-control'}),
+            'special_requests': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+        
 # Add restaurant detail view
 def restaurant_detail(request, restaurant_id):
     print("\n=== Restaurant Detail View Debug ===")
