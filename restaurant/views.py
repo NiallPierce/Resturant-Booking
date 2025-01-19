@@ -4,7 +4,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
 from .models import Restaurant, MenuItem, Booking
 from django import forms
-from .forms import UserRegistrationForm
+from .forms import UserRegistrationForm, BookingForm
 
 def restaurant_list(request):
     print("\n=== Restaurant List View Debug ===")
@@ -37,7 +37,24 @@ class BookingForm(forms.ModelForm):
             'number_of_guests': forms.NumberInput(attrs={'class': 'form-control'}),
             'special_requests': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
-        
+
+@login_required
+def my_bookings(request):
+    bookings = Booking.objects.filter(user=request.user).order_by('-date', '-time')
+    return render(request, 'restaurant/my_bookings.html', {
+        'bookings': bookings
+    })
+
+@login_required
+def cancel_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    if booking.status != 'cancelled':
+        booking.status = 'cancelled'
+        booking.save()
+        messages.success(request, 'Your booking has been cancelled.')
+    return redirect('my_bookings')
+
+
 # Add restaurant detail view
 def restaurant_detail(request, restaurant_id):
     print("\n=== Restaurant Detail View Debug ===")
