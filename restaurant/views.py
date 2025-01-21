@@ -38,6 +38,12 @@ class BookingForm(forms.ModelForm):
             'special_requests': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+def contact(request):
+    restaurants = Restaurant.objects.all()
+    return render(request, 'restaurant/contact.html', {
+        'restaurants': restaurants
+    })
+
 @login_required
 def my_bookings(request):
     bookings = Booking.objects.filter(user=request.user).order_by('-date', '-time')

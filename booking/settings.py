@@ -62,6 +62,7 @@ ROOT_URLCONF = 'booking.urls'
 
 LOGIN_REDIRECT_URL = '/'  # Where to redirect after successful login
 LOGIN_URL = '/accounts/login/'  # Where to redirect for login
+LOGOUT_REDIRECT_URL = '/'
 
 TEMPLATES = [
     {
