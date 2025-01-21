@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
 from .models import Restaurant, MenuItem, Booking
@@ -60,6 +61,9 @@ def cancel_booking(request, booking_id):
         messages.success(request, 'Your booking has been cancelled.')
     return redirect('my_bookings')
 
+def logout_view(request):
+    logout(request)
+    return redirect('restaurant_list')
 
 # Add restaurant detail view
 def restaurant_detail(request, restaurant_id):
