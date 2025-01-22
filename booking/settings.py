@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '*.gitpod.io',
     '8000-niallpierce-resturantbo-rb3bpykd4gs.ws-us117.gitpod.io'
+    'restaurantbookingp4-3e3fd346ce64.herokuapp.com'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -133,6 +134,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Additional static files settings
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
