@@ -36,18 +36,18 @@ else:
 SECRET_KEY = 'django-insecure-azc3n28_*=kk#u47izxtq^itq73n!=q#gxmpa^b6**48ku0ptq'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     '*.gitpod.io',
-    '8000-niallpierce-resturantbo-c0pfu1kbtdj.ws-us117.gitpod.io',
-    'restaurantbookingp4-3e3fd346ce64.herokuapp.com',
+    'restaurantbookingp4.herokuapp.com',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://8000-niallpierce-resturantbo-c0pfu1kbtdj.ws-us117.gitpod.io'
+    'https://8000-niallpierce-resturantbo-c0pfu1kbtdj.ws-us117.gitpod.io',
+    'https://restaurantbookingp4-3e3fd346ce64.herokuapp.com',
 ]
 
 # Application definition
