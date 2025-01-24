@@ -1,3 +1,8 @@
+{% load static %}
+{% url 'logout' as logout_url %}
+{% url 'register' as signup_url %}
+{% url 'login' as login_url %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,7 +20,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">
+            <a class="navbar-brand" href="{% url 'restaurant_list' %}">
                 <i class="fas fa-utensils me-2"></i>
                 Restaurant Booking
             </a>
@@ -27,26 +32,32 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'restaurant_list' %}">Home</a>
                     </li>
-                    <li class="nav-item">
-                        {% if user.is_authenticated %}
-                            <a class="nav-link" href="{% url 'my_bookings' %}">My Bookings</a>
-                        {% endif %}
-                    </li>
                     {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'my_bookings' %}">My Bookings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == logout_url %}active{% endif %}" aria-current="page" href="{% url 'logout' %}">Logout</a>
+                        </li>
                     {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}">Register</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == signup_url %}active{% endif %}" aria-current="page" href="{% url 'register' %}">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == login_url %}active{% endif %}" aria-current="page" href="{% url 'login' %}">Login</a>
+                        </li>
                     {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'contact' %}">Contact</a>
                     </li>
+                    {% if not user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == signup_url %}active{% endif %}" href="{% url 'register' %}">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == login_url %}active{% endif %}" href="{% url 'login' %}">Login</a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -61,7 +72,7 @@
     <!-- Footer -->
     <footer class="bg-light py-4 mt-5">
         <div class="container text-center">
-            <p class="text-muted mb-0">Â© 2025 Restaurant Booking. All rights reserved.</p>
+            <p class="text-muted mb-0">© 2025 Restaurant Booking. All rights reserved.</p>
         </div>
     </footer>
 

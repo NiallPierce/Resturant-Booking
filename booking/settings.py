@@ -16,17 +16,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 import dj_database_url
 
-if 'DATABASE_URL' in os.environ:
-    DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+DATABASES = {
+   'default': dj_database_url.parse('postgresql://neondb_owner:npg_ISGLlUd9vcu4@ep-nameless-resonance-a8jyq4pc-pooler.eastus2.azure.neon.tech/neondb?sslmode=require')
+}
 
 
 # Quick-start development settings - unsuitable for production
@@ -36,17 +28,18 @@ else:
 SECRET_KEY = 'django-insecure-azc3n28_*=kk#u47izxtq^itq73n!=q#gxmpa^b6**48ku0ptq'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = False
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    '*.gitpod.io',
+    '8000-niallpierce-resturantbo-c0pfu1kbtdj.ws-us117.gitpod.io',
     'restaurantbookingp4.herokuapp.com',
+    '8000-niallpierce-resturantbo-33mg8lcy9ij.ws-us117.gitpod.io',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://8000-niallpierce-resturantbo-c0pfu1kbtdj.ws-us117.gitpod.io',
+    'https://8000-niallpierce-resturantbo-33mg8lcy9ij.ws-us117.gitpod.io',
     'https://restaurantbookingp4-3e3fd346ce64.herokuapp.com',
 ]
 
@@ -59,8 +52,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     'restaurant',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -71,12 +69,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ROOT_URLCONF = 'booking.urls'
 
+SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'  # Where to redirect after successful login
 LOGIN_URL = '/accounts/login/'  # Where to redirect for login
 LOGOUT_REDIRECT_URL = '/'
@@ -117,6 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
