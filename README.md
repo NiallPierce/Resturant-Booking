@@ -20,16 +20,14 @@ Restaurant Finder is a web application that allows users to browse restaurants, 
 
 1. **Restaurant Listings:**
    - Displays a list of restaurants with their names, addresses, opening hours, and contact details.
+    ![Restaurant Listings](screenshots/restaurant_list.png "Listings")
 
-2. **Time Slot Availability:**
-   - View and book time slots that fit within the restaurant’s operating hours.
-
-3. **Booking System:**
+2. **Booking System:**
    - Users can reserve tables by selecting a restaurant, time slot, and specifying the number of guests.
    - Users can provide special requests during booking.
 
-4. **Menu Display:**
+3. **Menu Display:**
    - Restaurants can showcase their menu items with descriptions and prices.
 
-5. **User Accounts:**
+4. **User Accounts:**
    - Allow users to create accounts to view and manage their bookings.
