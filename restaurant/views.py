@@ -1,7 +1,6 @@
-from django.shortcuts import render, redirect, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
 from .models import Restaurant, MenuItem, Booking
 from django import forms
@@ -90,7 +89,7 @@ def register(request):
             messages.success(request, f'Account created for {username}! You can now log in.')
             return redirect('login')
 
-    return render(request, 'registration/register.html', {'form': form})
+    return render(request, 'account/register.html', {'form': form})
 
 # Add booking view
 @login_required

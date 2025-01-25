@@ -28,18 +28,18 @@ DATABASES = {
 SECRET_KEY = 'django-insecure-azc3n28_*=kk#u47izxtq^itq73n!=q#gxmpa^b6**48ku0ptq'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     '8000-niallpierce-resturantbo-c0pfu1kbtdj.ws-us117.gitpod.io',
     'restaurantbookingp4.herokuapp.com',
-    '8000-niallpierce-resturantbo-33mg8lcy9ij.ws-us117.gitpod.io',
+    '8000-niallpierce-resturantbo-2aik29mhg8d.ws-us117.gitpod.io',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://8000-niallpierce-resturantbo-33mg8lcy9ij.ws-us117.gitpod.io',
+    'https://8000-niallpierce-resturantbo-2aik29mhg8d.ws-us117.gitpod.io',
     'https://restaurantbookingp4-3e3fd346ce64.herokuapp.com',
 ]
 
