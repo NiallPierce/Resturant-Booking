@@ -35,7 +35,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '8000-niallpierce-resturantbo-c0pfu1kbtdj.ws-us117.gitpod.io',
     'restaurantbookingp4.herokuapp.com',
-    '8000-niallpierce-resturantbo-2aik29mhg8d.ws-us117.gitpod.io',
+    'restaurantbookingp4-3e3fd346ce64.herokuapp.com',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
