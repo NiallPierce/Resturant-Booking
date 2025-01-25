@@ -127,3 +127,52 @@ Represents a menu item offered by a restaurant.
 
 ---
 
+## Testing
+
+### Test Cases:
+
+| Test Category            | Test Case                                                       | Expected Result                                                       | Pass/Fail |
+|--------------------------|----------------------------------------------------------------|------------------------------------------------------------------------|-----------|
+| **Functional Tests**     | User can create an account                                     | Account is created, and user is redirected to the login page          | Pass      |
+|                          | User can log in                                               | User is logged in and redirected to the dashboard                     | Pass      |
+|                          | User can view restaurant details                              | Restaurant details page displays correct information                  | Pass      |
+|                          | User can book a table                                         | Booking is saved, and confirmation is shown                          | Pass      |
+|                          | User can view their bookings                                  | Bookings are listed on the "My Bookings" page                        | Pass      |
+| **Edge Cases**           | Booking a full time slot                                      | Error message displayed, booking is not created                      | Pass      |
+|                          | Canceling a booking                                           | Booking is removed from the system                                   | Pass      |
+|                          | Invalid login credentials                                     | Error message is shown, login is prevented                           | Pass      |
+
+---
+
+## UX Design
+
+This section outlines the key design considerations that aim to provide a positive user experience for the Restaurant Finder application.
+
+**1. Clear Navigation**
+   *   **Header Navigation:** The header contains navigation links for "Restaurants", "Login", "Register", and "Contact". These links are clearly visible and provide straightforward navigation to essential areas of the application.
+   *   **Consistent Placement:** The navigation bar is consistently placed at the top of the page, which aids in predictability and helps the user easily understand how to move through the application.
+
+**2. Restaurant Listing**
+
+   *   **Clear Structure:** The restaurant list is presented in an organized, card-like format. Each restaurant's information is distinctly separated for easy viewing, including the Restaurant Name, Address, and opening hours.
+   *   **Actionable Buttons:** Each restaurant card contains "Book Now" and "More Info" buttons. These provide clear calls to action and are easy to identify, facilitating easy engagement and task completion.
+   *   **Welcome Message:**  A welcome message is present above the restaurant listing which provides clear instructions as to the purpose of the application.
+
+**3. Responsive Layout**
+
+   *   The interface is responsive to different device sizes. The use of card-like scale nicely across a wide range of screen sizes.
+
+**4. Visual Hierarchy**
+
+   *   **Headings:** Heading sizes and styles are well-defined to clearly indicate the title of the page or section.
+   *   **Text:** The text is of an appropriate size and contrast to ensure it is easily read.
+
+**Further UX Considerations (Future Enhancements)**
+
+   *   **Search Functionality:** Adding a search bar would allow users to quickly find specific restaurants.
+   *   **Filtering and Sorting:** Features to filter restaurants by cuisine, price, or rating, and sort by distance or popularity could further improve the experience.
+   *   **User Feedback:** Integrating a rating system for restaurants would give users a way to communicate their experience.
+   *  **Loading states:** Handling loading states can improve the user experience by providing feedback to the user that the website is working on a specific request.
+   * **Error states:** Designing for error states can improve the user experience by clearly communicating to the user that something went wrong and how to resolve it.
+
+This UX design prioritizes ease of use and quick access to information, making it simple for users to find and book a restaurant. Future enhancements will build upon this foundation, making for an excellent user experience.
