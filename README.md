@@ -176,3 +176,35 @@ This section outlines the key design considerations that aim to provide a positi
    * **Error states:** Designing for error states can improve the user experience by clearly communicating to the user that something went wrong and how to resolve it.
 
 This UX design prioritizes ease of use and quick access to information, making it simple for users to find and book a restaurant. Future enhancements will build upon this foundation, making for an excellent user experience.
+
+---
+
+## Bugs
+
+### Solved Bugs
+1. **Import Statements:** Fixed an issue with incorrect import statements being used causing page to not load.
+2. **Registration Form:** Addressed issue with register form working with trusted origins issue where path register was failing due to a trailing "/".
+3. **Allauth issue:** Resolved issue where allauth was stopping styles from being applied to log in and register page.
+
+### Remaining Bugs
+- There are currently no remaining bugs.
+
+---
+
+## Deployment
+
+The following steps were taken to deploy the application:
+
+1. Create a new Heroku App.
+2. Link the Heroku App to the repository.
+3. Deploy the app via Heroku.
+
+---
+
+## Credits
+
+1. **Code Institute:** Provided the foundational structure and project setup inspiration.
+2. **W3 Schools & Django Documentation:** For guidance on model development and validation.
+3. **Heroku:** For deployment resources and tutorials.
+
+---
