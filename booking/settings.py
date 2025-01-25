@@ -33,13 +33,13 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    '8000-niallpierce-resturantbo-c0pfu1kbtdj.ws-us117.gitpod.io',
+    '8000-niallpierce-resturantbo-o46i1jwlelk.ws-us117.gitpod.io',
     'restaurantbookingp4.herokuapp.com',
     'restaurantbookingp4-3e3fd346ce64.herokuapp.com',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://8000-niallpierce-resturantbo-2aik29mhg8d.ws-us117.gitpod.io',
+    'https://8000-niallpierce-resturantbo-o46i1jwlelk.ws-us117.gitpod.io',
     'https://restaurantbookingp4-3e3fd346ce64.herokuapp.com',
 ]
 

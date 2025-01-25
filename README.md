@@ -31,3 +31,16 @@ Restaurant Finder is a web application that allows users to browse restaurants, 
 
 4. **User Accounts:**
    - Allow users to create accounts to view and manage their bookings.
+
+### Future Features:
+
+1. **Rating and Reviews:**
+   - Enable users to rate restaurants and provide reviews after dining.
+
+2. **Enhanced Search and Filters:**
+   - Add advanced filters for cuisine, price range, and ratings.
+
+3. **Email Notifications:**
+   - Send users confirmation emails and reminders for their bookings.
+
+---
