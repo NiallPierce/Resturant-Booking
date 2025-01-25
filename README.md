@@ -203,7 +203,7 @@ The following steps were taken to deploy the application:
 
 ## Credits
 
-1. **Code Institute:** Provided the foundational structure and project setup inspiration.
+1. **Code Institute:** Provided the foundational structure and project setup inspiration and support with bootstrap.
 2. **W3 Schools & Django Documentation:** For guidance on model development and validation.
 3. **Heroku:** For deployment resources and tutorials.
 
