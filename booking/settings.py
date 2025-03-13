@@ -33,15 +33,17 @@ DEBUG = False
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    '8000-niallpierce-resturantbo-o46i1jwlelk.ws-us117.gitpod.io',
     'restaurantbookingp4.herokuapp.com',
-    'restaurantbookingp4-3e3fd346ce64.herokuapp.com',
+    'restaurantbookingp4-c41e1049427c.herokuapp.com',
+    '.herokuapp.com',
 ]
 
+
 CSRF_TRUSTED_ORIGINS = [
-    'https://8000-niallpierce-resturantbo-o46i1jwlelk.ws-us117.gitpod.io',
-    'https://restaurantbookingp4-3e3fd346ce64.herokuapp.com',
+    'https://restaurantbookingp4.herokuapp.com',
+    'https://restaurantbookingp4-c41e1049427c.herokuapp.com',
 ]
+
 
 # Application definition
 
