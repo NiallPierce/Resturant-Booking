@@ -5,6 +5,8 @@ from django.contrib import messages
 from .models import Restaurant, MenuItem, Booking
 from django import forms
 from .forms import UserRegistrationForm, BookingForm
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 def restaurant_list(request):
     print("\n=== Restaurant List View Debug ===")
@@ -120,4 +122,33 @@ def book_restaurant(request, restaurant_id):
     return render(request, 'restaurant/booking_form.html', {
         'form': form,
         'restaurant': restaurant
+    })
+
+@login_required
+def edit_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    if request.method == 'POST':
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your booking has been updated successfully.')
+            return redirect('my_bookings')
+    else:
+        form = BookingForm(instance=booking)
+    
+    return render(request, 'restaurant/edit_booking.html', {
+        'form': form,
+        'booking': booking
+    })
+
+@login_required
+def delete_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    if request.method == 'POST':
+        booking.delete()
+        messages.success(request, 'Your booking has been deleted successfully.')
+        return redirect('my_bookings')
+    
+    return render(request, 'restaurant/delete_booking.html', {
+        'booking': booking
     })
