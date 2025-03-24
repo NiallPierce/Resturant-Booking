@@ -309,3 +309,154 @@ The application was designed with a focus on user experience and intuitive navig
   - H3: 1.75rem
   - Body: 1rem
   - Small: 0.875rem
+
+  ## Testing
+
+### Automated Testing
+
+#### Unit Tests
+The project includes comprehensive unit tests for all models. These tests can be found in `restaurant/tests.py`.
+
+To run the tests:
+```bash
+python manage.py test
+```
+
+##### Model Tests Coverage:
+
+1. **RestaurantModelTest**
+   - Tests restaurant creation with all fields
+   - Validates field values and data types
+   - Coverage: Basic CRUD operations
+
+2. **TimeSlotModelTest**
+   - Tests time slot creation and association with restaurant
+   - Validates time formatting and availability status
+   - Coverage: Basic CRUD operations
+
+3. **BookingModelTest**
+   - Tests booking creation with user and restaurant association
+   - Validates booking details and status management
+   - Coverage: Basic CRUD operations
+
+4. **MenuItemModelTest**
+   - Tests menu item creation and restaurant association
+   - Validates price formatting and item details
+   - Coverage: Basic CRUD operations
+
+### Validation Testing
+
+#### HTML Validation
+All HTML templates have been validated using the W3C Markup Validation Service.
+
+| Page | Result | Evidence |
+|------|---------|-----------|
+| Home | Pass | [Screenshot](screenshots/validation/home-html.png) |
+| Restaurant List | Pass | [Screenshot](screenshots/validation/restaurant-list-html.png) |
+| Booking Form | Pass | [Screenshot](screenshots/validation/booking-form-html.png) |
+| Contact | Pass | [Screenshot](screenshots/validation/contact-html.png) |
+
+#### CSS Validation
+CSS has been validated using the W3C CSS Validation Service.
+
+| File | Result | Evidence |
+|------|---------|-----------|
+| Bootstrap CDN | Pass | External Library |
+| Custom CSS | Pass | [Screenshot](screenshots/validation/css.png) |
+
+#### Python Validation (PEP8)
+All Python files have been validated using pycodestyle (formerly pep8).
+
+| File | Result | Evidence |
+|------|---------|-----------|
+| models.py | Pass | [Screenshot](screenshots/validation/models-pep8.png) |
+| views.py | Pass | [Screenshot](screenshots/validation/views-pep8.png) |
+| forms.py | Pass | [Screenshot](screenshots/validation/forms-pep8.png) |
+| admin.py | Pass | [Screenshot](screenshots/validation/admin-pep8.png) |
+
+#### JavaScript Validation
+JavaScript code has been validated using JSHint.
+
+| File | Result | Evidence |
+|------|---------|-----------|
+| Bootstrap JS | Pass | External Library |
+| Custom JS | Pass | [Screenshot](screenshots/validation/js.png) |
+
+### Manual Testing
+
+#### User Authentication Features
+
+##### Registration
+| Test Case | Steps | Expected Result | Actual Result | Pass/Fail |
+|-----------|-------|-----------------|---------------|-----------|
+| Valid Registration | 1. Click Register<br>2. Fill form with valid data<br>3. Submit | Account created and logged in | As expected | Pass |
+| Invalid Email | 1. Click Register<br>2. Enter invalid email<br>3. Submit | Error message shown | As expected | Pass |
+| Password Mismatch | 1. Click Register<br>2. Enter different passwords<br>3. Submit | Error message shown | As expected | Pass |
+
+##### Login
+| Test Case | Steps | Expected Result | Actual Result | Pass/Fail |
+|-----------|-------|-----------------|---------------|-----------|
+| Valid Login | 1. Click Login<br>2. Enter valid credentials<br>3. Submit | Successfully logged in | As expected | Pass |
+| Invalid Password | 1. Click Login<br>2. Enter wrong password<br>3. Submit | Error message shown | As expected | Pass |
+
+#### Booking Features
+
+##### Create Booking
+| Test Case | Steps | Expected Result | Actual Result | Pass/Fail |
+|-----------|-------|-----------------|---------------|-----------|
+| Valid Booking | 1. Select restaurant<br>2. Choose date/time<br>3. Enter guests<br>4. Submit | Booking created | As expected | Pass |
+| Past Date | 1. Select past date<br>2. Submit | Error message shown | As expected | Pass |
+| Over Capacity | 1. Enter guests > capacity<br>2. Submit | Error message shown | As expected | Pass |
+
+##### Modify Booking
+| Test Case | Steps | Expected Result | Actual Result | Pass/Fail |
+|-----------|-------|-----------------|---------------|-----------|
+| Change Date | 1. Edit booking<br>2. Select new date<br>3. Submit | Date updated | As expected | Pass |
+| Change Guests | 1. Edit booking<br>2. Change guest number<br>3. Submit | Guest number updated | As expected | Pass |
+
+##### Delete Booking
+| Test Case | Steps | Expected Result | Actual Result | Pass/Fail |
+|-----------|-------|-----------------|---------------|-----------|
+| Cancel Booking | 1. View bookings<br>2. Click cancel<br>3. Confirm | Booking cancelled | As expected | Pass |
+
+#### Restaurant Features
+
+##### Restaurant List
+| Test Case | Steps | Expected Result | Actual Result | Pass/Fail |
+|-----------|-------|-----------------|---------------|-----------|
+| View List | 1. Visit homepage | List of restaurants shown | As expected | Pass |
+| Restaurant Details | 1. Click restaurant<br>2. View details | Details displayed | As expected | Pass |
+
+##### Menu Items
+| Test Case | Steps | Expected Result | Actual Result | Pass/Fail |
+|-----------|-------|-----------------|---------------|-----------|
+| View Menu | 1. Visit restaurant<br>2. View menu | Menu items shown | As expected | Pass |
+| Item Details | 1. Click menu item | Item details shown | As expected | Pass |
+
+#### Responsive Design Testing
+
+##### Mobile View
+| Test Case | Steps | Expected Result | Actual Result | Pass/Fail |
+|-----------|-------|-----------------|---------------|-----------|
+| Navigation | 1. View on mobile<br>2. Click menu | Hamburger menu works | As expected | Pass |
+| Booking Form | 1. Complete booking on mobile | Form is usable | As expected | Pass |
+
+##### Tablet View
+| Test Case | Steps | Expected Result | Actual Result | Pass/Fail |
+|-----------|-------|-----------------|---------------|-----------|
+| Layout | 1. View on tablet | Responsive layout | As expected | Pass |
+| Images | 1. Check images | Properly scaled | As expected | Pass |
+
+##### Desktop View
+| Test Case | Steps | Expected Result | Actual Result | Pass/Fail |
+|-----------|-------|-----------------|---------------|-----------|
+| Navigation | 1. View on desktop | Full menu shown | As expected | Pass |
+| Content | 1. Check layout | Properly formatted | As expected | Pass |
+
+### Bug Tracking
+
+#### Known Bugs
+| Bug ID | Description | Status | Resolution |
+|--------|-------------|--------|------------|
+| BUG-001 | Past dates selectable in date picker | Fixed | Added date validation |
+| BUG-002 | Double booking possible for same slot | Fixed | Added booking conflict check |
