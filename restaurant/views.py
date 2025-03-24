@@ -7,6 +7,34 @@ from django import forms
 from .forms import UserRegistrationForm, BookingForm
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from datetime import date
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = ['date', 'time', 'number_of_guests', 'special_requests']
+        widgets = {
+            'date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control',
+                'min': date.today().strftime('%Y-%m-%d')
+            }),
+            'time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'number_of_guests': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'special_requests': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+    def clean_date(self):
+        selected_date = self.cleaned_data.get('date')
+        if selected_date < date.today():
+            raise forms.ValidationError("You cannot select a date in the past.")
+        return selected_date
+
+    def clean_number_of_guests(self):
+        guests = self.cleaned_data.get('number_of_guests')
+        if guests < 1:
+            raise forms.ValidationError("Number of guests must be at least 1.")
+        return guests
 
 def restaurant_list(request):
     print("\n=== Restaurant List View Debug ===")
@@ -27,18 +55,6 @@ def restaurant_list(request):
     print("=== End Debug ===\n")
 
     return render(request, 'restaurant/restaurant_list.html', {'restaurants': restaurants})
-
-# Add new BookingForm class
-class BookingForm(forms.ModelForm):
-    class Meta:
-        model = Booking
-        fields = ['date', 'time', 'number_of_guests', 'special_requests']
-        widgets = {
-            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'number_of_guests': forms.NumberInput(attrs={'class': 'form-control'}),
-            'special_requests': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-        }
 
 def contact(request):
     restaurants = Restaurant.objects.all()
@@ -66,7 +82,6 @@ def logout_view(request):
     logout(request)
     return redirect('restaurant_list')
 
-# Add restaurant detail view
 def restaurant_detail(request, restaurant_id):
     print("\n=== Restaurant Detail View Debug ===")
     restaurant = get_object_or_404(Restaurant, id=restaurant_id)
@@ -80,7 +95,6 @@ def restaurant_detail(request, restaurant_id):
     })
 
 def register(request):
-    # Initialize form variable outside the if block
     form = UserRegistrationForm()
 
     if request.method == 'POST':
@@ -93,7 +107,6 @@ def register(request):
 
     return render(request, 'account/register.html', {'form': form})
 
-# Add booking view
 @login_required
 def book_restaurant(request, restaurant_id):
     print("\n=== Restaurant Booking View Debug ===")
@@ -110,7 +123,7 @@ def book_restaurant(request, restaurant_id):
             booking.restaurant = restaurant
             booking.save()
             print(f"Booking created for user: {request.user.username}")
-            return redirect('restaurant_list')  # create a confirmation view
+            return redirect('restaurant_list')
         else:
             print("Form validation failed")
             print(f"Form errors: {form.errors}")
@@ -127,9 +140,23 @@ def book_restaurant(request, restaurant_id):
 @login_required
 def edit_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    
+    # Only allow editing if booking is not cancelled
+    if booking.status == 'cancelled':
+        messages.error(request, 'Cancelled bookings cannot be edited.')
+        return redirect('my_bookings')
+    
     if request.method == 'POST':
         form = BookingForm(request.POST, instance=booking)
         if form.is_valid():
+            # Only update if the new date is not in the past
+            if form.cleaned_data['date'] < date.today():
+                messages.error(request, 'You cannot select a date in the past.')
+                return render(request, 'restaurant/edit_booking.html', {
+                    'form': form,
+                    'booking': booking
+                })
+            
             form.save()
             messages.success(request, 'Your booking has been updated successfully.')
             return redirect('my_bookings')
@@ -144,6 +171,7 @@ def edit_booking(request, booking_id):
 @login_required
 def delete_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    
     if request.method == 'POST':
         booking.delete()
         messages.success(request, 'Your booking has been deleted successfully.')

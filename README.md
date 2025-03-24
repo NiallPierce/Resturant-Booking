@@ -248,94 +248,64 @@ Restaurant Finder is a web application that allows users to browse restaurants, 
  
  **Fields:**
  - `name` (CharField): The name of the menu item.
- - `description` (TextField): A brief description of the dish.
+ - `description` (TextField): A description of the menu item.
  - `price` (DecimalField): The price of the menu item.
- - `restaurant` (ForeignKey): The associated restaurant offering this menu item.
+ - `restaurant` (ForeignKey): The restaurant offering the menu item.
  
  **Methods:**
  - `__str__`: Returns the name and price of the menu item.
- 
- ---
- 
- ## Testing
- 
- ### Test Cases:
- 
- | Test Category            | Test Case                                                       | Expected Result                                                       | Pass/Fail |
- |--------------------------|----------------------------------------------------------------|------------------------------------------------------------------------|-----------|
- | **Functional Tests**     | User can create an account                                     | Account is created, and user is redirected to the login page          | Pass      |
- |                          | User can log in                                               | User is logged in and redirected to the dashboard                     | Pass      |
- |                          | User can view restaurant details                              | Restaurant details page displays correct information                  | Pass      |
- |                          | User can book a table                                         | Booking is saved, and confirmation is shown                          | Pass      |
- |                          | User can view their bookings                                  | Bookings are listed on the "My Bookings" page                        | Pass      |
- | **Edge Cases**           | Booking a full time slot                                      | Error message displayed, booking is not created                      | Pass      |
- |                          | Canceling a booking                                           | Booking is removed from the system                                   | Pass      |
- |                          | Invalid login credentials                                     | Error message is shown, login is prevented                           | Pass      |
- 
- ---
- 
- ## UX Design
- 
- This section outlines the key design considerations that aim to provide a positive user experience for the Restaurant Finder application.
- 
- **1. Clear Navigation**
-    *   **Header Navigation:** The header contains navigation links for "Restaurants", "Login", "Register", and "Contact". These links are clearly visible and provide straightforward navigation to essential areas of the application.
-    *   **Consistent Placement:** The navigation bar is consistently placed at the top of the page, which aids in predictability and helps the user easily understand how to move through the application.
- 
- **2. Restaurant Listing**
- 
-    *   **Clear Structure:** The restaurant list is presented in an organized, card-like format. Each restaurant's information is distinctly separated for easy viewing, including the Restaurant Name, Address, and opening hours.
-    *   **Actionable Buttons:** Each restaurant card contains "Book Now" and "More Info" buttons. These provide clear calls to action and are easy to identify, facilitating easy engagement and task completion.
-    *   **Welcome Message:**  A welcome message is present above the restaurant listing which provides clear instructions as to the purpose of the application.
- 
- **3. Responsive Layout**
- 
-    *   The interface is responsive to different device sizes. The use of card-like scale nicely across a wide range of screen sizes.
- 
- **4. Visual Hierarchy**
- 
-    *   **Headings:** Heading sizes and styles are well-defined to clearly indicate the title of the page or section.
-    *   **Text:** The text is of an appropriate size and contrast to ensure it is easily read.
- 
- **Further UX Considerations (Future Enhancements)**
- 
-    *   **Search Functionality:** Adding a search bar would allow users to quickly find specific restaurants.
-    *   **Filtering and Sorting:** Features to filter restaurants by cuisine, price, or rating, and sort by distance or popularity could further improve the experience.
-    *   **User Feedback:** Integrating a rating system for restaurants would give users a way to communicate their experience.
-    *  **Loading states:** Handling loading states can improve the user experience by providing feedback to the user that the website is working on a specific request.
-    * **Error states:** Designing for error states can improve the user experience by clearly communicating to the user that something went wrong and how to resolve it.
- 
- This UX design prioritizes ease of use and quick access to information, making it simple for users to find and book a restaurant. Future enhancements will build upon this foundation, making for an excellent user experience.
- This UX design prioritizes ease of use and quick access to information, making it simple for users to find and book a restaurant. Future enhancements will build upon this foundation, making for an excellent user experience.
- 
- ---
- 
- ## Bugs
- 
- ### Solved Bugs
- 1. **Import Statements:** Fixed an issue with incorrect import statements being used causing page to not load.
- 2. **Registration Form:** Addressed issue with register form working with trusted origins issue where path register was failing due to a trailing "/".
- 3. **Allauth issue:** Resolved issue where allauth was stopping styles from being applied to log in and register page.
- 
- ### Remaining Bugs
- - There are currently no remaining bugs.
- 
- ---
- 
- ## Deployment
- 
- The following steps were taken to deploy the application:
- 
- 1. Create a new Heroku App.
- 2. Link the Heroku App to the repository.
- 3. Deploy the app via Heroku.
- 
- ---
- 
- ## Credits
- 
- 1. **Code Institute:** Provided the foundational structure and project setup inspiration.
- 2. **W3 Schools & Django Documentation:** For guidance on model development and validation.
- 3. **Heroku:** For deployment resources and tutorials.
- 
- ---
+
+## Design
+
+### Wireframes
+
+The application was designed with a focus on user experience and intuitive navigation.
+
+### Design Decisions
+
+1. **User Interface**
+   - Clean, minimalist design focusing on content
+   - Responsive layout that works on all devices
+   - Clear call-to-action buttons
+   - Consistent color scheme and typography
+
+2. **User Experience**
+   - Intuitive navigation flow
+   - Clear feedback for user actions
+   - Easy-to-use booking process
+   - Quick access to important information
+
+3. **Technical Architecture**
+   - Django-based backend for robust data handling
+   - PostgreSQL database for reliable data storage
+   - Django Admin interface for efficient management
+   - RESTful API design for future scalability
+
+4. **Security Considerations**
+   - User authentication and authorization
+   - Secure form handling
+   - Data validation and sanitization
+   - CSRF protection
+
+5. **Performance Optimization**
+   - Efficient database queries
+   - Caching strategies
+   - Optimized static file serving
+   - Lazy loading of images
+
+### Color Scheme
+- Primary: #2C3E50 (Dark Blue)
+- Secondary: #E74C3C (Red)
+- Accent: #3498DB (Light Blue)
+- Background: #F8F9FA (Light Gray)
+- Text: #2C3E50 (Dark Blue)
+
+### Typography
+- Headings: 'Roboto', sans-serif
+- Body: 'Open Sans', sans-serif
+- Sizes:
+  - H1: 2.5rem
+  - H2: 2rem
+  - H3: 1.75rem
+  - Body: 1rem
+  - Small: 0.875rem
