@@ -367,7 +367,7 @@ CSS has been validated using the W3C CSS Validation Service.
 All Python files have been validated using pycodestyle (formerly pep8).
 
 | File | Result |
-|------|---------|-----------|
+|------|---------|
 | models.py | Pass |
 | views.py | Pass |
 | forms.py | Pass |
@@ -379,7 +379,7 @@ JavaScript code has been validated using JSHint.
 | File | Result | Evidence |
 |------|---------|-----------|
 | Bootstrap JS | Pass | External Library |
-| Custom JS | Pass | [Screenshot](screenshots/validation/js.png) |
+
 
 ### Manual Testing
 
