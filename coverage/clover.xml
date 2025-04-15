@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1744693436924" clover="3.2.0">
-  <project timestamp="1744693436924" name="All files">
-    <metrics statements="38" coveredstatements="38" conditionals="30" coveredconditionals="29" methods="6" coveredmethods="6" elements="74" coveredelements="73" complexity="0" loc="38" ncloc="38" packages="1" files="1" classes="1"/>
+<coverage generated="1744693660310" clover="3.2.0">
+  <project timestamp="1744693660310" name="All files">
+    <metrics statements="38" coveredstatements="38" conditionals="28" coveredconditionals="27" methods="6" coveredmethods="6" elements="72" coveredelements="71" complexity="0" loc="38" ncloc="38" packages="1" files="1" classes="1"/>
     <file name="booking.js" path="/workspace/Resturant-Booking/static/js/booking.js">
-      <metrics statements="38" coveredstatements="38" conditionals="30" coveredconditionals="29" methods="6" coveredmethods="6"/>
+      <metrics statements="38" coveredstatements="38" conditionals="28" coveredconditionals="27" methods="6" coveredmethods="6"/>
       <line num="3" count="9" type="stmt"/>
       <line num="4" count="9" type="cond" truecount="2" falsecount="0"/>
       <line num="5" count="8" type="stmt"/>
@@ -30,8 +30,8 @@
       <line num="47" count="8" type="stmt"/>
       <line num="48" count="21" type="stmt"/>
       <line num="49" count="21" type="stmt"/>
-      <line num="50" count="21" type="cond" truecount="4" falsecount="0"/>
-      <line num="51" count="3" type="stmt"/>
+      <line num="50" count="21" type="cond" truecount="2" falsecount="0"/>
+      <line num="51" count="7" type="stmt"/>
       <line num="57" count="16" type="cond" truecount="2" falsecount="0"/>
       <line num="59" count="14" type="stmt"/>
       <line num="60" count="14" type="stmt"/>

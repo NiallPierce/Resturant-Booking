@@ -78,7 +78,7 @@ describe('BookingForm', () => {
         bookingForm.showError(dateInput, 'Test error message');
         
         expect(dateInput.classList.contains('is-invalid')).toBe(true);
-        const errorDiv = dateInput.nextElementSibling;
+        const errorDiv = dateInput.parentNode.querySelector('.invalid-feedback');
         expect(errorDiv).not.toBeNull();
         expect(errorDiv.classList.contains('invalid-feedback')).toBe(true);
         expect(errorDiv.textContent).toBe('Test error message');

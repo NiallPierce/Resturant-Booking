@@ -46,8 +46,8 @@ class BookingForm {
         const inputs = this.form.querySelectorAll('input');
         inputs.forEach(input => {
             input.classList.remove('is-invalid');
-            const errorDiv = input.nextElementSibling;
-            if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+            const errorDiv = input.parentNode.querySelector('.invalid-feedback');
+            if (errorDiv) {
                 errorDiv.remove();
             }
         });
