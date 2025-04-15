@@ -351,10 +351,9 @@ All HTML templates have been validated using the W3C Markup Validation Service.
 
 | Page | Result | Evidence |
 |------|---------|-----------|
-| Home | Pass | [Screenshot](screenshots/validation/home-html.png) |
-| Restaurant List | Pass | [Screenshot](screenshots/validation/restaurant-list-html.png) |
-| Booking Form | Pass | [Screenshot](screenshots/validation/booking-form-html.png) |
-| Contact | Pass | [Screenshot](screenshots/validation/contact-html.png) |
+| Home | Pass | [Screenshot](screenshots/validation/base.html.png) |
+| Booking Form | Pass | [Screenshot](screenshots/validation/book.html.png) |
+| Contact | Pass | [Screenshot](screenshots/validation/contact.png) |
 
 #### CSS Validation
 CSS has been validated using the W3C CSS Validation Service.
@@ -367,12 +366,12 @@ CSS has been validated using the W3C CSS Validation Service.
 #### Python Validation (PEP8)
 All Python files have been validated using pycodestyle (formerly pep8).
 
-| File | Result | Evidence |
+| File | Result |
 |------|---------|-----------|
-| models.py | Pass | [Screenshot](screenshots/validation/models-pep8.png) |
-| views.py | Pass | [Screenshot](screenshots/validation/views-pep8.png) |
-| forms.py | Pass | [Screenshot](screenshots/validation/forms-pep8.png) |
-| admin.py | Pass | [Screenshot](screenshots/validation/admin-pep8.png) |
+| models.py | Pass |
+| views.py | Pass |
+| forms.py | Pass |
+| admin.py | Pass |
 
 #### JavaScript Validation
 JavaScript code has been validated using JSHint.
