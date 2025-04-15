@@ -193,7 +193,10 @@ def edit_booking(request, booking_id):
         if form.is_valid():
             # Only update if the new date is not in the past
             if form.cleaned_data['date'] < date.today():
-                messages.error(request, 'You cannot select a date in the past.')
+                messages.error(
+                    request,
+                    'You cannot select a date in the past.'
+                )
                 return render(
                     request,
                     'restaurant/edit_booking.html',
