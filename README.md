@@ -33,28 +33,118 @@ This project uses Git for version control and GitHub for repository hosting. The
    - Feature branches for new functionality
 
 ### Agile Methodology
-The project was developed using Agile methodology with GitHub Projects:
+The project was developed using Agile methodology with GitHub Projects. Each sprint was carefully planned and executed to deliver incremental value:
 
-1. **Project Board**:
-   - User Stories
-   - Sprint Backlog
-   - In Progress
-   - Testing
-   - Done
+#### Sprint Details
 
-2. **Sprints**:
-   - Sprint 1: Initial Setup and Models
-   - Sprint 2: Basic UI and Restaurant Management
-   - Sprint 3: Authentication System
-   - Sprint 4: Booking System and Contact
-   - Sprint 5: Testing and Deployment
+1. **Sprint 1: Initial Setup and Models**
+   - **Goals**: 
+     - Set up Django project structure
+     - Create data models for restaurants and bookings
+     - Implement basic database functionality
+   - **Outcomes**:
+     - Successfully created Restaurant, Table, TimeSlot models
+     - Implemented database relationships
+     - Set up admin interface
+   - **Challenges Overcome**:
+     - Optimized model relationships for efficient queries
+     - Implemented proper validation for booking times
 
-3. **User Stories**:
-   - As a user, I want to browse restaurants
-   - As a user, I want to make a booking
-   - As a user, I want to manage my bookings
-   - As a restaurant, I want to manage my menu
-   - As an admin, I want to manage bookings
+2. **Sprint 2: Basic UI and Restaurant Management**
+   - **Goals**:
+     - Create responsive frontend design
+     - Implement restaurant listing page
+     - Add restaurant detail views
+   - **Outcomes**:
+     - Implemented Bootstrap-based responsive design
+     - Created restaurant cards with key information
+     - Added filtering and search functionality
+   - **Challenges Overcome**:
+     - Ensured mobile responsiveness
+     - Optimized image loading for performance
+
+3. **Sprint 3: Authentication System**
+   - **Goals**:
+     - Implement user registration
+     - Add login/logout functionality
+     - Create user profiles
+   - **Outcomes**:
+     - Successfully integrated django-allauth
+     - Implemented secure authentication
+     - Added user profile management
+   - **Challenges Overcome**:
+     - Secured user data
+     - Implemented password reset functionality
+
+4. **Sprint 4: Booking System and Contact**
+   - **Goals**:
+     - Create booking functionality
+     - Implement time slot management
+     - Add contact form
+   - **Outcomes**:
+     - Implemented booking system with validation
+     - Added email confirmation
+     - Created contact form with validation
+   - **Challenges Overcome**:
+     - Handled concurrent booking requests
+     - Implemented booking confirmation system
+
+5. **Working Features**
+   - **Goals**:
+     - Test all implemented features
+     - Fix any identified bugs
+     - Optimize performance
+   - **Outcomes**:
+     - All core features working as intended
+     - Improved loading times
+     - Enhanced user experience
+   - **Challenges Overcome**:
+     - Resolved booking conflicts
+     - Improved form validation
+
+#### User Stories and Acceptance Criteria
+
+1. **User Authentication**
+   - As a user, I want to create an account
+   - As a user, I want to log in securely
+   - As a user, I want to reset my password
+   - **Acceptance Criteria**:
+     - Registration form with validation
+     - Secure login system
+     - Password reset functionality
+
+2. **Restaurant Browsing**
+   - As a user, I want to view available restaurants
+   - As a user, I want to search for restaurants
+   - As a user, I want to view restaurant details
+   - **Acceptance Criteria**:
+     - List view of all restaurants
+     - Search and filter functionality
+     - Detailed restaurant information pages
+
+3. **Booking Management**
+   - As a user, I want to make a restaurant booking
+   - As a user, I want to view my bookings
+   - As a user, I want to modify/cancel my booking
+   - **Acceptance Criteria**:
+     - Booking form with time slot selection
+     - Booking management interface
+     - Cancellation functionality
+
+4. **Restaurant Administration**
+   - As an admin, I want to manage restaurants
+   - As an admin, I want to handle bookings
+   - As an admin, I want to manage time slots
+   - **Acceptance Criteria**:
+     - Admin interface for restaurant management
+     - Booking approval system
+     - Time slot management tools
+
+#### Agile Tools Used
+- GitHub Projects for sprint planning and tracking
+- User story templates for consistent documentation
+- Sprint retrospectives for continuous improvement
+- Regular sprint reviews and updates
 
 ## UX Design
 
