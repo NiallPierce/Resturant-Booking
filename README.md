@@ -279,24 +279,24 @@ Manual testing was performed for:
 1. **Restaurant Listings:**
    - Displays a list of restaurants with their names, addresses, opening hours, and contact details.
 
-    ![Restaurant Listings](screenshots/restaurant_list.png "Listings")
+    ![Restaurant Listings](screenshots/P4home.png "Listings")
 
 2. **Booking System:**
    - Users can reserve tables by selecting a restaurant, time slot, and specifying the number of guests.
    - Users can provide special requests during booking.
 
-   ![Booking](screenshots/booking.png "Booking")
+   ![Booking](screenshots/p4book.png "Booking")
 
 3. **Menu Display:**
    - Restaurants can showcase their menu items with descriptions and prices.
 
-   ![Menu](screenshots/menu.png "Menu")
+   ![Menu](screenshots/p4menu.png "Menu")
 
 4. **User Accounts:**
    - Allow users to create accounts to view and manage their bookings.
 
-   ![Register](screenshots/register.png "Register")
-   ![Bookings](screenshots/my_bookings.png "My Bookings")
+   ![Register](screenshots/p4register.png "Register")
+   ![Bookings](screenshots/p4bookings.png "My Bookings")
 
 ### Future Features:
 
