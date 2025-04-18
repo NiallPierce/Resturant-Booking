@@ -1,5 +1,7 @@
 # Restaurant Finder
 
+[Live Site](https://restaurantbookingp4-c41e1049427c.herokuapp.com/)
+
 Restaurant Finder is a web application that allows users to browse restaurants, check time slots, and make bookings. Designed to simplify the reservation process, this app ensures users can conveniently plan their dining experience.
 
 ## Project Goals
