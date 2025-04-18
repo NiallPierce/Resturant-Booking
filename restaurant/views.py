@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import logout
 from django.contrib import messages
-from .models import Restaurant, MenuItem, Booking, Contact
+from .models import Restaurant, MenuItem, Booking, Contact, Table, TimeSlot
 from django import forms
 from .forms import UserRegistrationForm, BookingForm, MenuItemForm, ContactForm
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from datetime import date
+from datetime import date, datetime
+from decimal import Decimal
 
 
 class BookingForm(forms.ModelForm):
@@ -48,7 +49,20 @@ class BookingForm(forms.ModelForm):
         return guests
 
 
+def staff_required(view_func):
+    """Decorator to ensure the user is a staff member."""
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('account_login')
+        if not request.user.is_staff:
+            messages.error(request, 'You do not have permission to access this page.')
+            return redirect('restaurant_list')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+
 def restaurant_list(request):
+    """View to display a list of all restaurants."""
     print("\n=== Restaurant List View Debug ===")
     print(f"Request Path: {request.path}")
     print(f"Request Method: {request.method}")
@@ -126,35 +140,13 @@ def my_bookings(request):
 def cancel_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
     
-    if booking.status == 'cancelled':
-        messages.warning(
-            request,
-            'This booking has already been cancelled.'
-        )
-        return redirect('my_bookings')
-    
     if request.method == 'POST':
-        try:
-            booking.status = 'cancelled'
-            booking.save()
-            messages.success(
-                request,
-                'Your booking has been cancelled successfully.'
-            )
-        except Exception as e:
-            messages.error(
-                request,
-                'An error occurred while cancelling your booking. '
-                'Please try again later.'
-            )
-            print(f"Booking cancellation error: {str(e)}")
+        booking.status = 'cancelled'
+        booking.save()
+        messages.success(request, 'Your booking has been cancelled.')
         return redirect('my_bookings')
     
-    return render(
-        request,
-        'restaurant/cancel_booking.html',
-        {'booking': booking}
-    )
+    return render(request, 'restaurant/delete_booking.html', {'booking': booking})
 
 
 def logout_view(request):
@@ -451,16 +443,9 @@ def delete_menu_item(request, menu_item_id):
     )
 
 
-@login_required
+@staff_required
 def contact_messages(request):
-    """View for admin to manage contact messages."""
-    if not request.user.is_staff:
-        messages.error(
-            request,
-            'You do not have permission to view contact messages.'
-        )
-        return redirect('restaurant_list')
-    
+    """View for admin to see all contact messages."""
     contacts = Contact.objects.all().order_by('-created_at')
     return render(
         request,
@@ -469,16 +454,9 @@ def contact_messages(request):
     )
 
 
-@login_required
+@staff_required
 def view_contact(request, contact_id):
     """View for admin to view a specific contact message."""
-    if not request.user.is_staff:
-        messages.error(
-            request,
-            'You do not have permission to view contact messages.'
-        )
-        return redirect('restaurant_list')
-    
     contact = get_object_or_404(Contact, id=contact_id)
     if contact.status == 'unread':
         contact.status = 'read'
@@ -491,16 +469,9 @@ def view_contact(request, contact_id):
     )
 
 
-@login_required
+@staff_required
 def update_contact_status(request, contact_id):
     """View for admin to update contact message status."""
-    if not request.user.is_staff:
-        messages.error(
-            request,
-            'You do not have permission to update contact messages.'
-        )
-        return redirect('restaurant_list')
-    
     contact = get_object_or_404(Contact, id=contact_id)
     
     if request.method == 'POST':
@@ -529,16 +500,9 @@ def update_contact_status(request, contact_id):
     return redirect('view_contact', contact_id=contact_id)
 
 
-@login_required
+@staff_required
 def delete_contact(request, contact_id):
     """View for admin to delete a contact message."""
-    if not request.user.is_staff:
-        messages.error(
-            request,
-            'You do not have permission to delete contact messages.'
-        )
-        return redirect('restaurant_list')
-    
     contact = get_object_or_404(Contact, id=contact_id)
     
     if request.method == 'POST':
@@ -548,6 +512,7 @@ def delete_contact(request, contact_id):
                 request,
                 'Contact message deleted successfully!'
             )
+            return redirect('contact_messages')
         except Exception as e:
             messages.error(
                 request,
@@ -555,7 +520,7 @@ def delete_contact(request, contact_id):
                 'Please try again later.'
             )
             print(f"Contact deletion error: {str(e)}")
-        return redirect('contact_messages')
+            return redirect('view_contact', contact_id=contact_id)
     
     return render(
         request,

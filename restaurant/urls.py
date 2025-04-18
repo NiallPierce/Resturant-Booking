@@ -32,4 +32,13 @@ urlpatterns = [
         name='delete_booking'
     ),
     path('contact/', views.contact, name='contact'),
+    path('contact/messages/', views.contact_messages, name='contact_messages'),
+    path('contact/<int:contact_id>/', views.view_contact, name='view_contact'),
+    path('contact/<int:contact_id>/update-status/', views.update_contact_status, name='update_contact_status'),
+    path('contact/<int:contact_id>/delete/', views.delete_contact, name='delete_contact'),
+    
+    path('restaurant/<int:restaurant_id>/menu/', views.manage_menu, name='manage_menu'),
+    path('restaurant/<int:restaurant_id>/menu/add/', views.add_menu_item, name='add_menu_item'),
+    path('menu/<int:menu_item_id>/edit/', views.edit_menu_item, name='edit_menu_item'),
+    path('menu/<int:menu_item_id>/delete/', views.delete_menu_item, name='delete_menu_item'),
 ]

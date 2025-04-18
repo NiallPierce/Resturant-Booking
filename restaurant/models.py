@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
+from django.core.exceptions import ValidationError
 
 
 # Restaurant Model
@@ -28,6 +29,26 @@ class Table(models.Model):
     table_number = models.IntegerField()
     capacity = models.IntegerField()
     is_active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ['restaurant', 'table_number']
+
+    def clean(self):
+        if self.capacity <= 0:
+            raise ValidationError('Table capacity must be greater than 0.')
+        
+        # Check for duplicate table numbers within the same restaurant
+        if Table.objects.filter(
+            restaurant=self.restaurant,
+            table_number=self.table_number
+        ).exclude(id=self.id).exists():
+            raise ValidationError(
+                f'Table number {self.table_number} already exists for this restaurant.'
+            )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return (
@@ -97,6 +118,14 @@ class MenuItem(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+
+    def clean(self):
+        if self.price is not None and self.price < 0:
+            raise ValidationError('Price cannot be negative.')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} - ${self.price}"

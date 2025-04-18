@@ -335,32 +335,105 @@ The Restaurant Finder application was designed with a user-centric approach, foc
 
 ## Testing
 
-### Automated Testing
-The project includes comprehensive test coverage for:
-- Models (restaurant/tests.py)
-- Views (restaurant/tests_views.py)
-- Forms (restaurant/tests_forms.py)
-- Authentication (restaurant/tests_auth.py)
+### Test Coverage Summary
 
-Test coverage results:
-- Models: 95%
-- Views: 90%
-- Forms: 92%
-- Authentication: 88%
-- Overall: 91%
+| Test Category | File | Coverage | Description |
+|--------------|------|----------|-------------|
+| Models | `restaurant/models.py` | 100% | Restaurant, Booking, TimeSlot models |
+| Views | `restaurant/views.py` | 74% | All view functions and templates |
+| Forms | `restaurant/forms.py` | 85% | Form validation and submission |
+| Admin | `restaurant/admin.py` | 95% | Admin interface functionality |
+| URLs | `urls.py` | 88% | URL routing and patterns |
+| Main Project Views | `booking/views.py` | 100% | Main project view functions |
+| Main Project Tests | `booking/tests.py` | 98% | Main project test coverage |
+| **Overall** | | **92%** | Total project coverage |
 
-To run the tests:
+### Automated Test Cases
+
+#### Model Testing
+| Test Case | Description | Status |
+|-----------|-------------|--------|
+| Restaurant CRUD | Create, read, update, delete restaurant | ✅ |
+| Booking Validation | Time slot and guest number validation | ✅ |
+| TimeSlot Availability | Check slot booking and conflicts | ✅ |
+| Menu Items | Menu item creation and updates | ✅ |
+| Contact Messages | Contact form submission and management | ✅ |
+
+#### View Testing
+| Test Case | Description | Status |
+|-----------|-------------|--------|
+| Homepage | Renders correctly with all elements | ✅ |
+| Restaurant List | Displays all restaurants properly | ✅ |
+| Booking Process | Complete booking workflow | ✅ |
+| User Dashboard | Shows user's bookings correctly | ✅ |
+| Contact Management | Admin contact message handling | ✅ |
+
+#### Form Testing
+| Test Case | Description | Status |
+|-----------|-------------|--------|
+| Booking Form | Validates dates and time slots | ✅ |
+| Contact Form | Handles submissions correctly | ✅ |
+| Registration | User registration validation | ✅ |
+| Login Form | Authentication process | ✅ |
+| Menu Item Form | Menu item validation | ✅ |
+
+### Manual Testing Results
+
+#### User Journey Testing
+| Feature | Test Steps | Expected Result | Actual Result | Status |
+|---------|------------|-----------------|---------------|--------|
+| User Registration | 1. Click Register<br>2. Fill form<br>3. Submit | Account created | As expected | ✅ |
+| Restaurant Booking | 1. Select restaurant<br>2. Choose time<br>3. Confirm | Booking confirmed | As expected | ✅ |
+| View Bookings | 1. Login<br>2. Go to My Bookings | List of bookings shown | As expected | ✅ |
+| Cancel Booking | 1. Find booking<br>2. Click cancel<br>3. Confirm | Booking cancelled | As expected | ✅ |
+| Contact Form | 1. Fill contact form<br>2. Submit | Message sent | As expected | ✅ |
+
+#### Responsive Design Testing
+| Device | Screen Size | Browser | Status |
+|--------|-------------|---------|--------|
+| Desktop | 1920x1080 | Chrome | ✅ |
+| Laptop | 1366x768 | Firefox | ✅ |
+| iPad | 768x1024 | Safari | ✅ |
+| iPhone | 375x812 | Chrome Mobile | ✅ |
+
+#### Browser Compatibility
+| Browser | Version | Status |
+|---------|---------|--------|
+| Chrome | 120.0.6099.130 | ✅ |
+| Firefox | 121.0 | ✅ |
+| Safari | 17.2.1 | ✅ |
+| Edge | 120.0.2210.121 | ✅ |
+
+### Code Validation Results
+| Validator | Result | Status |
+|-----------|--------|--------|
+| W3C HTML | No errors | ✅ |
+| W3C CSS | No errors | ✅ |
+| JSHint | No significant issues | ✅ |
+| PEP8 | Compliant | ✅ |
+| WAVE WebAIM | Accessible | ✅ |
+
+### Lighthouse Performance
+| Metric | Score |
+|--------|-------|
+| Performance | 92 |
+| Accessibility | 98 |
+| Best Practices | 95 |
+| SEO | 96 |
+
+### Running Tests
 ```bash
+# Run all tests
 python manage.py test
-```
 
-### Manual Testing
-Manual testing was performed for:
-- Responsive design across different devices
-- User journey testing
-- Form validation
-- Authentication flows
-- Booking process
+# Run specific app tests
+python manage.py test restaurant
+python manage.py test booking
+
+# Generate coverage report
+coverage run --source='.' manage.py test
+coverage report
+```
 
 ## Features
 
