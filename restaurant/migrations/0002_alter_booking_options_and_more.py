@@ -24,13 +24,24 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='booking',
             name='created_at',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            field=models.DateTimeField(
+                auto_now_add=True,
+                default=django.utils.timezone.now
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='booking',
             name='status',
-            field=models.CharField(choices=[('pending', 'Pending'), ('confirmed', 'Confirmed'), ('cancelled', 'Cancelled')], default='pending', max_length=20),
+            field=models.CharField(
+                choices=[
+                    ('pending', 'Pending'),
+                    ('confirmed', 'Confirmed'),
+                    ('cancelled', 'Cancelled')
+                ],
+                default='pending',
+                max_length=20
+            ),
         ),
         migrations.AddField(
             model_name='booking',
@@ -76,31 +87,57 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Table',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(
+                    auto_created=True,
+                    primary_key=True,
+                    serialize=False,
+                    verbose_name='ID'
+                )),
                 ('table_number', models.IntegerField()),
                 ('capacity', models.IntegerField()),
                 ('is_active', models.BooleanField(default=True)),
-                ('restaurant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='restaurant.restaurant')),
+                ('restaurant', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to='restaurant.restaurant'
+                )),
             ],
         ),
         migrations.AddField(
             model_name='booking',
             name='table',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='restaurant.table'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='restaurant.table'
+            ),
         ),
         migrations.CreateModel(
             name='TimeSlot',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(
+                    auto_created=True,
+                    primary_key=True,
+                    serialize=False,
+                    verbose_name='ID'
+                )),
                 ('start_time', models.TimeField()),
                 ('end_time', models.TimeField()),
                 ('is_available', models.BooleanField(default=True)),
-                ('restaurant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='restaurant.restaurant')),
+                ('restaurant', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to='restaurant.restaurant'
+                )),
             ],
         ),
         migrations.AddField(
             model_name='booking',
             name='time_slot',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='restaurant.timeslot'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to='restaurant.timeslot'
+            ),
         ),
     ]

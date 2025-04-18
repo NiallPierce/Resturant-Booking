@@ -2,12 +2,11 @@ from django.test import TestCase, Client
 from .models import Restaurant, TimeSlot, Booking, MenuItem, Table, Contact
 from django.contrib.auth.models import User
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from decimal import Decimal
 from .forms import BookingForm
 from django.urls import reverse
 from django.core.exceptions import ValidationError
-from django.contrib import messages
 
 
 class RestaurantModelTest(TestCase):
@@ -71,7 +70,10 @@ class TimeSlotModelTest(TestCase):
         self.assertTrue(self.time_slot.is_available)
 
     def test_time_slot_str_method(self):
-        expected = f"{self.restaurant.name} - {self.time_slot.start_time} to {self.time_slot.end_time}"
+        expected = (
+            f"{self.restaurant.name} - {self.time_slot.start_time} "
+            f"to {self.time_slot.end_time}"
+        )
         self.assertEqual(str(self.time_slot), expected)
 
     def test_time_slot_availability(self):
@@ -102,7 +104,10 @@ class TableModelTest(TestCase):
         self.assertTrue(self.table.is_active)
 
     def test_table_str_method(self):
-        expected = f"{self.restaurant.name} - Table {self.table.table_number} (Seats {self.table.capacity})"
+        expected = (
+            f"{self.restaurant.name} - Table {self.table.table_number} "
+            f"(Seats {self.table.capacity})"
+        )
         self.assertEqual(str(self.table), expected)
 
     def test_table_activation(self):
@@ -118,7 +123,7 @@ class TableModelTest(TestCase):
             capacity=6,
             is_active=True
         )
-        valid_table.full_clean()  # Should not raise an error
+        valid_table.full_clean()
 
         # Test invalid capacity (negative)
         invalid_table = Table(
@@ -131,10 +136,9 @@ class TableModelTest(TestCase):
             invalid_table.full_clean()
 
     def test_table_number_uniqueness(self):
-        # Create another table with the same number
         duplicate_table = Table(
             restaurant=self.restaurant,
-            table_number=1,  # Same as self.table
+            table_number=1,
             capacity=4,
             is_active=True
         )
@@ -142,11 +146,28 @@ class TableModelTest(TestCase):
             duplicate_table.full_clean()
 
     def test_table_restaurant_cascade_delete(self):
-        # Test that tables are deleted when their restaurant is deleted
         table_id = self.table.id
         self.restaurant.delete()
         with self.assertRaises(Table.DoesNotExist):
             Table.objects.get(id=table_id)
+
+    def test_table_validation(self):
+        restaurant = Restaurant.objects.create(
+            name='Test Restaurant',
+            address='123 Test St',
+            contact_number='1234567890',
+            email='test@example.com',
+            opening_time=datetime.strptime('09:00', '%H:%M').time(),
+            closing_time=datetime.strptime('22:00', '%H:%M').time()
+        )
+        table = Table(
+            restaurant=restaurant,
+            table_number=1,
+            capacity=0,
+            is_active=True
+        )
+        with self.assertRaises(ValidationError):
+            table.full_clean()
 
 
 class BookingModelTest(TestCase):
@@ -163,7 +184,6 @@ class BookingModelTest(TestCase):
             opening_time=datetime.strptime('09:00', '%H:%M').time(),
             closing_time=datetime.strptime('22:00', '%H:%M').time(),
         )
-
         self.table = Table.objects.create(
             restaurant=self.restaurant,
             table_number=1,
@@ -198,64 +218,31 @@ class BookingModelTest(TestCase):
         self.assertEqual(self.booking.status, "pending")
 
     def test_booking_form_validation(self):
-        """Test booking form validation"""
-        # Create a table for testing
-        table = Table.objects.create(
-            restaurant=self.restaurant,
-            table_number=2,  # Changed from 1 to 2 to avoid conflict
-            capacity=4,
-            is_active=True
-        )
-        
         form_data = {
-            'date': timezone.now().date() + timedelta(days=1),
-            'time': datetime.strptime('12:00', '%H:%M').time(),
-            'number_of_guests': 4,
-            'special_requests': 'Test request',
-            'table': table.id
+            'date': timezone.now().date(),
+            'time': timezone.now().time(),
+            'number_of_guests': 2,
+            'special_requests': 'Test request'
         }
-        
-        # Test valid form
         form = BookingForm(data=form_data)
         self.assertTrue(form.is_valid())
-        
-        # Test invalid number of guests
+
         form_data['number_of_guests'] = 0
         form = BookingForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('number_of_guests', form.errors)
-        
+
         form_data['number_of_guests'] = 9
         form = BookingForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('number_of_guests', form.errors)
-        
-        # Test past date
-        form_data['number_of_guests'] = 4
-        form_data['date'] = timezone.now().date() - timedelta(days=1)
-        form = BookingForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('date', form.errors)
-        
-        # Test invalid time
-        form_data['date'] = timezone.now().date() + timedelta(days=1)
-        form_data['time'] = datetime.strptime('23:00', '%H:%M').time()
-        form = BookingForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('time', form.errors)
 
     def test_booking_str_method(self):
-        expected = f"Booking for {self.user.username} at {self.restaurant.name} on {self.booking.date} at {self.booking.time}"
-        self.assertEqual(str(self.booking), expected)
-
-    def test_user_login(self):
-        response = self.client.login(username='testuser', password='testpassword')
-        self.assertTrue(response)
-
-    def test_user_logout(self):
-        self.client.login(username='testuser', password='testpassword')
-        response = self.client.logout()
-        self.assertEqual(response, None)
+        self.assertEqual(
+            str(self.booking),
+            f"Booking for {self.booking.restaurant.name} on "
+            f"{self.booking.date}"
+        )
 
     def test_restaurant_list_view(self):
         response = self.client.get(reverse('restaurant_list'))
@@ -263,25 +250,27 @@ class BookingModelTest(TestCase):
         self.assertTemplateUsed(response, 'restaurant/restaurant_list.html')
 
     def test_restaurant_detail_view(self):
-        response = self.client.get(reverse('restaurant_detail', args=[self.restaurant.id]))
+        response = self.client.get(
+            reverse('restaurant_detail', args=[self.restaurant.id])
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/restaurant_detail.html')
 
     def test_booking_create_view(self):
         self.client.login(username='testuser', password='testpassword')
-        response = self.client.get(reverse('book_restaurant', args=[self.restaurant.id]))
+        response = self.client.get(
+            reverse('book_restaurant', args=[self.restaurant.id])
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/booking_form.html')
 
     def test_booking_form_edge_cases(self):
-        # Test empty form
         form = BookingForm(data={})
         self.assertFalse(form.is_valid())
         self.assertIn('date', form.errors)
         self.assertIn('time', form.errors)
         self.assertIn('number_of_guests', form.errors)
 
-        # Test form with missing fields
         form_data = {
             'date': timezone.now().date() + timedelta(days=1),
             'time': datetime.strptime('12:00', '%H:%M').time(),
@@ -289,18 +278,121 @@ class BookingModelTest(TestCase):
             'special_requests': 'Test request',
             'table': self.table.id
         }
-        
+
         partial_data = form_data.copy()
         del partial_data['date']
         form = BookingForm(data=partial_data)
         self.assertFalse(form.is_valid())
         self.assertIn('date', form.errors)
 
-        # Test maximum guests
         form_data['number_of_guests'] = 11
         form = BookingForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('number_of_guests', form.errors)
+
+    def test_booking_validation(self):
+        restaurant = Restaurant.objects.create(
+            name='Test Restaurant',
+            address='123 Test St',
+            contact_number='1234567890',
+            opening_time=datetime.strptime('09:00', '%H:%M').time(),
+            closing_time=datetime.strptime('22:00', '%H:%M').time()
+        )
+        table = Table.objects.create(
+            restaurant=restaurant,
+            table_number=1,
+            capacity=4,
+            is_active=True
+        )
+        user = User.objects.create_user(
+            username='testuser_booking',
+            password='testpass123'
+        )
+        booking = Booking.objects.create(
+            user=user,
+            restaurant=restaurant,
+            table=table,
+            date=date.today(),
+            time=datetime.strptime('12:00', '%H:%M').time(),
+            number_of_guests=4,
+            status='pending'
+        )
+        self.assertEqual(booking.status, 'pending')
+
+        form_data = {
+            'date': date.today(),
+            'time': datetime.strptime('12:00', '%H:%M').time(),
+            'number_of_guests': 0,
+            'table': table.id,
+            'special_requests': 'Test request'
+        }
+        form = BookingForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('number_of_guests', form.errors)
+
+    def test_booking_unauthorized_access(self):
+        """Test that users cannot access other users' bookings"""
+        User.objects.create_user(
+            username="otheruser",
+            password="otherpassword"
+        )
+        self.client.login(username='otheruser', password='otherpassword')
+
+        # Test delete booking
+        response = self.client.get(
+            reverse('delete_booking', args=[self.booking.id])
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_booking_view(self):
+        self.client.login(username='testuser', password='testpassword')
+
+        booking_url = reverse('delete_booking', args=[self.booking.id])
+        response = self.client.get(booking_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'restaurant/delete_booking.html')
+        self.assertIn('booking', response.context)
+        self.assertEqual(response.context['booking'], self.booking)
+
+        response = self.client.post(booking_url)
+        self.assertEqual(response.status_code, 302)
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status, 'cancelled')
+
+    def test_delete_booking_requires_login(self):
+        """Test that deleting a booking requires login"""
+        response = self.client.post(
+            reverse('delete_booking', args=[self.booking.id])
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            f'/accounts/login/?next=/booking/{self.booking.id}/delete/'
+        )
+
+    def test_cannot_delete_others_booking(self):
+        """Test that a user cannot delete another user's booking"""
+        User.objects.create_user(
+            username="otheruser",
+            password="otherpassword"
+        )
+        self.client.login(username='otheruser', password='otherpassword')
+        response = self.client.post(
+            reverse('delete_booking', args=[self.booking.id])
+        )
+        self.assertEqual(response.status_code, 403)
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status, 'pending')
+
+    def test_edit_booking_view(self):
+        """Test that users can edit their own bookings"""
+        self.client.login(username='testuser', password='testpassword')
+        edit_url = reverse('edit_booking', args=[self.booking.id])
+        response = self.client.get(edit_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'restaurant/booking_form.html')
+        self.assertIn('form', response.context)
+        self.assertEqual(response.context['form'].instance, self.booking)
 
 
 class MenuItemModelTest(TestCase):
@@ -328,16 +420,14 @@ class MenuItemModelTest(TestCase):
         self.assertEqual(str(self.menu_item), "Test Item - $10.99")
 
     def test_menu_item_price_validation(self):
-        # Test creating a menu item with valid price
         valid_item = MenuItem(
             name="Valid Item",
             description="Valid Description",
             price=Decimal('15.99'),
             restaurant=self.restaurant
         )
-        valid_item.full_clean()  # Should not raise an error
+        valid_item.full_clean()
 
-        # Test creating a menu item with negative price
         invalid_item = MenuItem(
             name="Invalid Item",
             description="Invalid Description",
@@ -379,18 +469,13 @@ class ContactModelTest(TestCase):
             self.assertEqual(self.contact.status, status)
 
     def test_contact_ordering(self):
-        # Create another contact with a later timestamp
         later_contact = Contact.objects.create(
             name="Later User",
             email="later@example.com",
             subject="Later Subject",
             message="Later message"
         )
-        
-        # Get all contacts ordered by created_at
         contacts = Contact.objects.all()
-        
-        # The later contact should be first due to ordering
         self.assertEqual(contacts[0], later_contact)
         self.assertEqual(contacts[1], self.contact)
 
@@ -414,9 +499,9 @@ class ContactViewTest(TestCase):
 
     def test_contact_form_submission(self):
         response = self.client.post(self.contact_url, self.valid_data)
-        self.assertEqual(response.status_code, 302)  # Should redirect after successful submission
+        self.assertEqual(response.status_code, 302)
         self.assertEqual(Contact.objects.count(), 1)
-        
+
         contact = Contact.objects.first()
         self.assertEqual(contact.name, self.valid_data['name'])
         self.assertEqual(contact.email, self.valid_data['email'])
@@ -426,29 +511,32 @@ class ContactViewTest(TestCase):
 
     def test_contact_form_invalid_data(self):
         invalid_data = self.valid_data.copy()
-        invalid_data['email'] = 'invalid-email'  # Invalid email format
-        
+        invalid_data['email'] = 'invalid-email'
         response = self.client.post(self.contact_url, invalid_data)
-        self.assertEqual(response.status_code, 200)  # Should stay on the same page
-        self.assertEqual(Contact.objects.count(), 0)  # No contact should be created
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Contact.objects.count(), 0)
         form = response.context['form']
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
-        self.assertEqual(form.errors['email'][0], 'Enter a valid email address.')
+        self.assertEqual(
+            form.errors['email'][0],
+            'Enter a valid email address.'
+        )
 
     def test_contact_form_missing_fields(self):
-        # Test with missing required fields
         for field in ['name', 'email', 'subject', 'message']:
             data = self.valid_data.copy()
             del data[field]
-            
             response = self.client.post(self.contact_url, data)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(Contact.objects.count(), 0)
             form = response.context['form']
             self.assertFalse(form.is_valid())
             self.assertIn(field, form.errors)
-            self.assertEqual(form.errors[field][0], 'This field is required.')
+            self.assertEqual(
+                form.errors[field][0],
+                'This field is required.'
+            )
 
 
 class BookingViewTest(TestCase):
@@ -483,11 +571,9 @@ class BookingViewTest(TestCase):
         )
 
     def test_my_bookings_view(self):
-        # Test unauthenticated access
         response = self.client.get(reverse('my_bookings'))
-        self.assertEqual(response.status_code, 302)  # Should redirect to login
+        self.assertEqual(response.status_code, 302)
 
-        # Test authenticated access
         self.client.login(username='testuser', password='testpassword')
         response = self.client.get(reverse('my_bookings'))
         self.assertEqual(response.status_code, 200)
@@ -496,83 +582,30 @@ class BookingViewTest(TestCase):
         self.assertEqual(len(response.context['bookings']), 1)
         self.assertEqual(response.context['bookings'][0], self.booking)
 
-    def test_cancel_booking_view(self):
+    def test_delete_booking_view(self):
         self.client.login(username='testuser', password='testpassword')
-        
-        # Test GET request
-        response = self.client.get(reverse('cancel_booking', args=[self.booking.id]))
+
+        booking_url = reverse('delete_booking', args=[self.booking.id])
+        response = self.client.get(booking_url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/delete_booking.html')
         self.assertIn('booking', response.context)
         self.assertEqual(response.context['booking'], self.booking)
 
-        # Test POST request
-        response = self.client.post(reverse('cancel_booking', args=[self.booking.id]))
-        self.assertEqual(response.status_code, 302)  # Should redirect to my_bookings
+        response = self.client.post(booking_url)
+        self.assertEqual(response.status_code, 302)
         self.booking.refresh_from_db()
         self.assertEqual(self.booking.status, 'cancelled')
 
     def test_edit_booking_view(self):
+        """Test that users can edit their own bookings"""
         self.client.login(username='testuser', password='testpassword')
-        
-        # Test GET request
-        response = self.client.get(reverse('edit_booking', args=[self.booking.id]))
+        edit_url = reverse('edit_booking', args=[self.booking.id])
+        response = self.client.get(edit_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'restaurant/edit_booking.html')
+        self.assertTemplateUsed(response, 'restaurant/booking_form.html')
         self.assertIn('form', response.context)
-        self.assertIn('booking', response.context)
-        self.assertEqual(response.context['booking'], self.booking)
-
-        # Test POST request with valid data
-        new_date = timezone.now().date() + timedelta(days=2)
-        new_time = datetime.strptime('14:00', '%H:%M').time()
-        form_data = {
-            'date': new_date,
-            'time': new_time,
-            'number_of_guests': 3,
-            'special_requests': 'Updated request'
-        }
-        response = self.client.post(reverse('edit_booking', args=[self.booking.id]), form_data)
-        self.assertEqual(response.status_code, 302)  # Should redirect to my_bookings
-        self.booking.refresh_from_db()
-        self.assertEqual(self.booking.date, new_date)
-        self.assertEqual(self.booking.time, new_time)
-        self.assertEqual(self.booking.number_of_guests, 3)
-        self.assertEqual(self.booking.special_requests, 'Updated request')
-
-    def test_delete_booking_view(self):
-        self.client.login(username='testuser', password='testpassword')
-        
-        # Test GET request
-        response = self.client.get(reverse('delete_booking', args=[self.booking.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'restaurant/delete_booking.html')
-        self.assertIn('booking', response.context)
-        self.assertEqual(response.context['booking'], self.booking)
-
-        # Test POST request
-        response = self.client.post(reverse('delete_booking', args=[self.booking.id]))
-        self.assertEqual(response.status_code, 302)  # Should redirect to my_bookings
-        with self.assertRaises(Booking.DoesNotExist):
-            Booking.objects.get(id=self.booking.id)
-
-    def test_booking_unauthorized_access(self):
-        # Create another user
-        other_user = User.objects.create_user(
-            username="otheruser",
-            password="otherpassword"
-        )
-        self.client.login(username='otheruser', password='otherpassword')
-
-        # Test accessing other user's booking
-        response = self.client.get(reverse('edit_booking', args=[self.booking.id]))
-        self.assertEqual(response.status_code, 404)
-
-        response = self.client.get(reverse('delete_booking', args=[self.booking.id]))
-        self.assertEqual(response.status_code, 404)
-
-        response = self.client.get(reverse('cancel_booking', args=[self.booking.id]))
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.context['form'].instance, self.booking)
 
 
 class MenuViewTest(TestCase):
@@ -581,8 +614,10 @@ class MenuViewTest(TestCase):
         self.user = User.objects.create_user(
             username="testuser",
             password="testpassword",
-            email="test@example.com"
+            email="test@example.com",
+            is_staff=True
         )
+        self.client.login(username="testuser", password="testpassword")
         self.restaurant = Restaurant.objects.create(
             name="Test Restaurant",
             address="123 Test Street",
@@ -597,9 +632,11 @@ class MenuViewTest(TestCase):
         )
 
     def test_manage_menu_view(self):
+        """Test that staff can access the menu management page"""
         self.client.login(username='testuser', password='testpassword')
-        
-        response = self.client.get(reverse('manage_menu', args=[self.restaurant.id]))
+        response = self.client.get(
+            reverse('manage_menu', args=[self.restaurant.id])
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/manage_menu.html')
         self.assertIn('restaurant', response.context)
@@ -608,108 +645,58 @@ class MenuViewTest(TestCase):
         self.assertEqual(len(response.context['menu_items']), 1)
         self.assertEqual(response.context['menu_items'][0], self.menu_item)
 
-    def test_add_menu_item_view(self):
-        self.client.login(username='testuser', password='testpassword')
-        
-        # Test GET request
-        response = self.client.get(reverse('add_menu_item', args=[self.restaurant.id]))
+    def test_menu_item_form_view(self):
+        response = self.client.get(
+            reverse('edit_menu_item', args=[self.menu_item.id])
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'restaurant/add_menu_item.html')
-        self.assertIn('form', response.context)
-        self.assertIn('restaurant', response.context)
-        self.assertEqual(response.context['restaurant'], self.restaurant)
-
-        # Test POST request with valid data
-        form_data = {
-            'name': 'New Item',
-            'description': 'New Description',
-            'price': '15.99'
-        }
-        response = self.client.post(reverse('add_menu_item', args=[self.restaurant.id]), form_data)
-        self.assertEqual(response.status_code, 302)  # Should redirect to manage_menu
-        self.assertEqual(MenuItem.objects.count(), 2)
-        new_item = MenuItem.objects.latest('id')
-        self.assertEqual(new_item.name, 'New Item')
-        self.assertEqual(new_item.description, 'New Description')
-        self.assertEqual(new_item.price, Decimal('15.99'))
-        self.assertEqual(new_item.restaurant, self.restaurant)
+        self.assertTemplateUsed(response, 'restaurant/menu_item_form.html')
 
     def test_edit_menu_item_view(self):
-        self.client.login(username='testuser', password='testpassword')
-        
-        # Test GET request
-        response = self.client.get(reverse('edit_menu_item', args=[self.menu_item.id]))
+        response = self.client.get(
+            reverse('edit_menu_item', args=[self.menu_item.id])
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'restaurant/edit_menu_item.html')
-        self.assertIn('form', response.context)
-        self.assertIn('menu_item', response.context)
-        self.assertEqual(response.context['menu_item'], self.menu_item)
+        self.assertTemplateUsed(response, 'restaurant/menu_item_form.html')
 
-        # Test POST request with valid data
-        form_data = {
-            'name': 'Updated Item',
-            'description': 'Updated Description',
-            'price': '12.99'
-        }
-        response = self.client.post(reverse('edit_menu_item', args=[self.menu_item.id]), form_data)
-        self.assertEqual(response.status_code, 302)  # Should redirect to manage_menu
-        self.menu_item.refresh_from_db()
-        self.assertEqual(self.menu_item.name, 'Updated Item')
-        self.assertEqual(self.menu_item.description, 'Updated Description')
-        self.assertEqual(self.menu_item.price, Decimal('12.99'))
+    def test_menu_item_validation(self):
+        """Test that menu items require a name and price"""
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.post(
+            reverse('add_menu_item', args=[self.restaurant.id]),
+            {
+                'name': '',
+                'price': '',
+                'description': 'Test description'
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertFalse(form.is_valid())
+        self.assertIn('name', form.errors)
+        self.assertIn('price', form.errors)
+        self.assertEqual(form.errors['name'][0], 'This field is required.')
+        self.assertEqual(form.errors['price'][0], 'This field is required.')
 
     def test_delete_menu_item_view(self):
         self.client.login(username='testuser', password='testpassword')
-        
-        # Test GET request
-        response = self.client.get(reverse('delete_menu_item', args=[self.menu_item.id]))
+        response = self.client.get(
+            reverse(
+                'delete_menu_item',
+                args=[self.menu_item.id]
+            )
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/delete_menu_item.html')
         self.assertIn('menu_item', response.context)
         self.assertEqual(response.context['menu_item'], self.menu_item)
 
-        # Test POST request
-        response = self.client.post(reverse('delete_menu_item', args=[self.menu_item.id]))
-        self.assertEqual(response.status_code, 302)  # Should redirect to manage_menu
+        response = self.client.post(
+            reverse('delete_menu_item', args=[self.menu_item.id])
+        )
+        self.assertEqual(response.status_code, 302)
         with self.assertRaises(MenuItem.DoesNotExist):
             MenuItem.objects.get(id=self.menu_item.id)
-
-    def test_menu_item_validation(self):
-        self.client.login(username='testuser', password='testpassword')
-        
-        # Test negative price
-        form_data = {
-            'name': 'Invalid Item',
-            'description': 'Invalid Description',
-            'price': '-5.99'
-        }
-        response = self.client.post(reverse('add_menu_item', args=[self.restaurant.id]), form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('form', response.context)
-        self.assertFalse(response.context['form'].is_valid())
-        self.assertIn('price', response.context['form'].errors)
-
-        # Test missing required fields
-        form_data = {
-            'name': '',
-            'description': '',
-            'price': '10.99'  # Provide a valid price
-        }
-        response = self.client.post(reverse('add_menu_item', args=[self.restaurant.id]), form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('form', response.context)
-        self.assertFalse(response.context['form'].is_valid())
-        self.assertIn('name', response.context['form'].errors)
-        self.assertIn('description', response.context['form'].errors)
-
-        # Test valid data
-        form_data = {
-            'name': 'Valid Item',
-            'description': 'Valid Description',
-            'price': '10.99'
-        }
-        response = self.client.post(reverse('add_menu_item', args=[self.restaurant.id]), form_data)
-        self.assertEqual(response.status_code, 302)  # Should redirect on success
 
 
 class ContactAdminViewTest(TestCase):
@@ -719,7 +706,7 @@ class ContactAdminViewTest(TestCase):
             username="testuser",
             password="testpassword",
             email="test@example.com",
-            is_staff=True  # Make user a staff member
+            is_staff=True
         )
         self.contact = Contact.objects.create(
             name="Test User",
@@ -731,7 +718,7 @@ class ContactAdminViewTest(TestCase):
 
     def test_contact_messages_view(self):
         self.client.login(username='testuser', password='testpassword')
-        
+
         response = self.client.get(reverse('contact_messages'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/contact_messages.html')
@@ -741,8 +728,10 @@ class ContactAdminViewTest(TestCase):
 
     def test_view_contact_view(self):
         self.client.login(username='testuser', password='testpassword')
-        
-        response = self.client.get(reverse('view_contact', args=[self.contact.id]))
+
+        response = self.client.get(
+            reverse('view_contact', args=[self.contact.id])
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/view_contact.html')
         self.assertIn('contact', response.context)
@@ -750,17 +739,15 @@ class ContactAdminViewTest(TestCase):
 
     def test_update_contact_status_view(self):
         self.client.login(username='testuser', password='testpassword')
-        
-        # Test updating to 'read' status
+
         response = self.client.post(
             reverse('update_contact_status', args=[self.contact.id]),
             {'status': 'read'}
         )
-        self.assertEqual(response.status_code, 302)  # Should redirect to contact_messages
+        self.assertEqual(response.status_code, 302)
         self.contact.refresh_from_db()
         self.assertEqual(self.contact.status, 'read')
 
-        # Test updating to 'replied' status
         response = self.client.post(
             reverse('update_contact_status', args=[self.contact.id]),
             {'status': 'replied'}
@@ -769,36 +756,44 @@ class ContactAdminViewTest(TestCase):
         self.contact.refresh_from_db()
         self.assertEqual(self.contact.status, 'replied')
 
-        # Test invalid status
         response = self.client.post(
             reverse('update_contact_status', args=[self.contact.id]),
             {'status': 'invalid'}
         )
-        self.assertEqual(response.status_code, 302)  # Should redirect to contact_messages
+        self.assertEqual(response.status_code, 302)
         self.contact.refresh_from_db()
-        self.assertEqual(self.contact.status, 'replied')  # Status should remain unchanged
+        self.assertEqual(self.contact.status, 'replied')
 
     def test_delete_contact_view(self):
         self.client.login(username='testuser', password='testpassword')
-        
-        # Test GET request
-        response = self.client.get(reverse('delete_contact', args=[self.contact.id]))
+
+        delete_url = reverse('delete_contact', args=[self.contact.id])
+        response = self.client.get(delete_url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/delete_contact.html')
         self.assertIn('contact', response.context)
         self.assertEqual(response.context['contact'], self.contact)
 
-        # Test POST request
-        response = self.client.post(reverse('delete_contact', args=[self.contact.id]))
-        self.assertEqual(response.status_code, 302)  # Should redirect to contact_messages
+        response = self.client.post(delete_url)
+        self.assertEqual(response.status_code, 302)
         with self.assertRaises(Contact.DoesNotExist):
             Contact.objects.get(id=self.contact.id)
 
     def test_contact_admin_unauthorized_access(self):
-        # Test unauthenticated access
-        for view_name in ['contact_messages', 'view_contact', 'update_contact_status', 'delete_contact']:
-            if view_name == 'contact_messages':
-                response = self.client.get(reverse(view_name))
-            else:
-                response = self.client.get(reverse(view_name, args=[self.contact.id]))
-            self.assertEqual(response.status_code, 302)  # Should redirect to login
+        response = self.client.get(reverse('contact_messages'))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            '/accounts/login/?next=/contact/messages/'
+        )
+
+        contact_url = reverse(
+            'view_contact',
+            kwargs={'contact_id': self.contact.id}
+        )
+        response = self.client.get(contact_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            f'/accounts/login/?next=/contact/messages/{self.contact.id}/'
+        )

@@ -6,7 +6,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -17,7 +16,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Restaurant',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(
+                    auto_created=True,
+                    primary_key=True,
+                    serialize=False,
+                    verbose_name='ID'
+                )),
                 ('name', models.CharField(max_length=100)),
                 ('address', models.TextField()),
                 ('contact_number', models.CharField(max_length=15)),
@@ -27,23 +31,42 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='MenuItem',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(
+                    auto_created=True,
+                    primary_key=True,
+                    serialize=False,
+                    verbose_name='ID'
+                )),
                 ('name', models.CharField(max_length=100)),
                 ('description', models.TextField()),
                 ('price', models.DecimalField(decimal_places=2, max_digits=6)),
-                ('restaurant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='restaurant.restaurant')),
+                ('restaurant', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to='restaurant.restaurant'
+                )),
             ],
         ),
         migrations.CreateModel(
             name='Booking',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(
+                    auto_created=True,
+                    primary_key=True,
+                    serialize=False,
+                    verbose_name='ID'
+                )),
                 ('date', models.DateField()),
                 ('time', models.TimeField()),
                 ('number_of_guests', models.PositiveIntegerField()),
                 ('special_requests', models.TextField(blank=True, null=True)),
-                ('restaurant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='restaurant.restaurant')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('restaurant', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to='restaurant.restaurant'
+                )),
+                ('user', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to=settings.AUTH_USER_MODEL
+                )),
             ],
         ),
     ]

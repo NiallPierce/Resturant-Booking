@@ -36,14 +36,14 @@ class Table(models.Model):
     def clean(self):
         if self.capacity <= 0:
             raise ValidationError('Table capacity must be greater than 0.')
-        
         # Check for duplicate table numbers within the same restaurant
         if Table.objects.filter(
             restaurant=self.restaurant,
             table_number=self.table_number
         ).exclude(id=self.id).exists():
             raise ValidationError(
-                f'Table number {self.table_number} already exists for this restaurant.'
+                f'Table {self.table_number} already exists '
+                f'for this restaurant.'
             )
 
     def save(self, *args, **kwargs):
@@ -65,7 +65,10 @@ class TimeSlot(models.Model):
     is_available = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.restaurant.name} - {self.start_time} to {self.end_time}"
+        return (
+            f"{self.restaurant.name} - {self.start_time.strftime('%H:%M:%S')} "
+            f"to {self.end_time.strftime('%H:%M:%S')}"
+        )
 
 
 # Booking Model
@@ -103,10 +106,7 @@ class Booking(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return (
-            f"Booking for {self.user.username} at {self.restaurant.name} "
-            f"on {self.date} at {self.time}"
-        )
+        return f"Booking for {self.restaurant.name} on {self.date}"
 
     class Meta:
         ordering = ['-date', '-time']  # Orders bookings by date and time

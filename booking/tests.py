@@ -3,8 +3,6 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from restaurant.models import Restaurant, Booking, Table, TimeSlot
 from datetime import datetime, timedelta
-import os
-from django.conf import settings
 
 
 class MainProjectTests(TestCase):
@@ -58,24 +56,30 @@ class MainProjectTests(TestCase):
     def test_booking_detail_authenticated(self):
         """Test booking_detail view for authenticated user."""
         self.client.login(username='testuser', password='testpass123')
-        response = self.client.get(reverse('booking_detail', args=[self.booking.id]))
+        response = self.client.get(
+            reverse('booking_detail', args=[self.booking.id])
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/delete_booking.html')
         self.assertEqual(response.context['booking'], self.booking)
 
     def test_booking_detail_unauthorized(self):
         """Test booking_detail view for unauthorized user."""
-        other_user = User.objects.create_user(
+        User.objects.create_user(
             username='otheruser',
             password='otherpass123'
         )
         self.client.login(username='otheruser', password='otherpass123')
-        response = self.client.get(reverse('booking_detail', args=[self.booking.id]))
+        response = self.client.get(
+            reverse('booking_detail', args=[self.booking.id])
+        )
         self.assertRedirects(response, reverse('my_bookings'))
 
     def test_booking_detail_unauthenticated(self):
         """Test booking_detail view for unauthenticated user."""
-        response = self.client.get(reverse('booking_detail', args=[self.booking.id]))
+        response = self.client.get(
+            reverse('booking_detail', args=[self.booking.id])
+        )
         self.assertEqual(response.status_code, 302)
         self.assertIn('/accounts/login/', response.url)
 
@@ -106,27 +110,27 @@ class MainProjectTests(TestCase):
         # Create a test static file
         import os
         from django.conf import settings
-        
+
         # Create test static directory if it doesn't exist
         test_static_dir = os.path.join(settings.STATIC_ROOT, 'test')
         os.makedirs(test_static_dir, exist_ok=True)
-        
+
         # Create a test file
         test_file_path = os.path.join(test_static_dir, 'test.txt')
         with open(test_file_path, 'w') as f:
             f.write('Test content')
-        
+
         # Check if the file is served
         response = self.client.get('/static/test/test.txt')
         self.assertEqual(response.status_code, 200)
-        
+
         # Handle WhiteNoiseFileResponse
         if hasattr(response, 'streaming_content'):
             content = b''.join(response.streaming_content)
         else:
             content = response.content
         self.assertEqual(content.decode(), 'Test content')
-        
+
         # Clean up
         os.remove(test_file_path)
-        os.rmdir(test_static_dir) 
+        os.rmdir(test_static_dir)

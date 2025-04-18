@@ -28,9 +28,8 @@
                             <div class="btn-group">
                                 {% if booking.status != 'cancelled' %}
                                     <a href="{% url 'edit_booking' booking.id %}" class="btn btn-primary">Edit</a>
-                                    <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-warning" onclick="return confirm('Are you sure you want to cancel this booking?')">Cancel</a>
+                                    <a href="{% url 'delete_booking' booking.id %}" class="btn btn-warning" onclick="return confirm('Are you sure you want to cancel this booking?')">Cancel Booking</a>
                                 {% endif %}
-                                <a href="{% url 'delete_booking' booking.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this booking? This action cannot be undone.')">Delete</a>
                             </div>
                         </div>
                     </div>

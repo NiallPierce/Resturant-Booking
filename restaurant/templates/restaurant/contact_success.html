@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="alert alert-success">
+        <h2>Message Sent Successfully!</h2>
+        <p>Thank you for contacting us. We will get back to you as soon as possible.</p>
+    </div>
+    <a href="{% url 'restaurant_list' %}" class="btn btn-primary">
+        Return to Home
+    </a>
+</div>
+{% endblock %} 

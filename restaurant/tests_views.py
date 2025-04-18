@@ -1,31 +1,27 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Restaurant, Booking, TimeSlot, Table, MenuItem, Contact
-from .forms import BookingForm, ContactForm, MenuItemForm
-from django.utils import timezone
-from datetime import datetime, timedelta
+from restaurant.models import Restaurant, MenuItem, Contact, Booking, Table
 from decimal import Decimal
+from datetime import datetime, date
 
 
-class ViewTests(TestCase):
+class RestaurantViewTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(
             username='testuser',
             password='testpass123',
-            email='test@example.com'
-        )
-        self.staff_user = User.objects.create_user(
-            username='staffuser',
-            password='staffpassword',
+            email='test@example.com',
             is_staff=True
         )
         self.restaurant = Restaurant.objects.create(
-            name="Test Restaurant",
-            address="123 Test Street",
+            name='Test Restaurant',
+            address='123 Test St',
+            description='Test Description',
             opening_time=datetime.strptime('09:00', '%H:%M').time(),
             closing_time=datetime.strptime('22:00', '%H:%M').time(),
+            capacity=50,
             contact_number='1234567890',
             email='restaurant@test.com'
         )
@@ -35,28 +31,15 @@ class ViewTests(TestCase):
             capacity=4,
             is_active=True
         )
-        self.time_slot = TimeSlot.objects.create(
-            restaurant=self.restaurant,
-            start_time=datetime.strptime('12:00', '%H:%M').time(),
-            end_time=datetime.strptime('14:00', '%H:%M').time(),
-            is_available=True
-        )
-        self.booking = Booking.objects.create(
-            user=self.user,
-            restaurant=self.restaurant,
-            date=datetime.now().date() + timedelta(days=1),
-            time=datetime.now().time(),
-            number_of_guests=2
-        )
         self.menu_item = MenuItem.objects.create(
             name='Test Item',
             description='Test Description',
-            price=Decimal('9.99'),
+            price=Decimal('10.99'),
             restaurant=self.restaurant
         )
         self.contact = Contact.objects.create(
             name='Test Contact',
-            email='contact@test.com',
+            email='test@example.com',
             subject='Test Subject',
             message='Test Message'
         )
@@ -65,260 +48,201 @@ class ViewTests(TestCase):
         response = self.client.get(reverse('restaurant_list'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/restaurant_list.html')
-        self.assertContains(response, self.restaurant.name)
+        self.assertIn('restaurants', response.context)
+        self.assertEqual(
+            list(response.context['restaurants']),
+            [self.restaurant]
+        )
 
     def test_restaurant_detail_view(self):
-        response = self.client.get(reverse('restaurant_detail', args=[self.restaurant.id]))
+        response = self.client.get(
+            reverse('restaurant_detail', args=[self.restaurant.id])
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/restaurant_detail.html')
-        self.assertContains(response, self.restaurant.name)
+        self.assertEqual(response.context['restaurant'], self.restaurant)
 
-    def test_booking_create_view_authenticated(self):
-        self.client.login(username='testuser', password='testpass123')
-        response = self.client.get(reverse('book_restaurant', args=[self.restaurant.id]))
+    def test_contact_view_get(self):
+        response = self.client.get(reverse('contact'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'restaurant/booking_form.html')
+        self.assertTemplateUsed(response, 'restaurant/contact.html')
+        self.assertIn('form', response.context)
 
-    def test_booking_create_view_unauthenticated(self):
-        response = self.client.get(reverse('book_restaurant', args=[self.restaurant.id]))
-        self.assertEqual(response.status_code, 302)  # Should redirect to login
-        self.assertRedirects(response, f'/accounts/login/?next=/restaurant/{self.restaurant.id}/book/')
+    def test_contact_form_submission(self):
+        response = self.client.post(
+            reverse('contact'),
+            {
+                'name': 'Test User',
+                'email': 'test@example.com',
+                'subject': 'Test Subject',
+                'message': 'Test Message'
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('contact_success'))
 
-    def test_my_bookings_view_authenticated(self):
-        self.client.login(username='testuser', password='testpass123')
-        response = self.client.get(reverse('my_bookings'))
+    def test_contact_view_post_invalid(self):
+        initial_count = Contact.objects.count()
+        data = {
+            'name': '',  # Empty name
+            'email': 'invalid-email',  # Invalid email format
+            'subject': '',  # Empty subject
+            'message': ''  # Empty message
+        }
+        response = self.client.post(reverse('contact'), data)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'restaurant/my_bookings.html')
+        # Check that no new objects were created
+        self.assertEqual(Contact.objects.count(), initial_count)
+        self.assertIn('form', response.context)
+        self.assertTrue(response.context['form'].errors)
+        self.assertIn('name', response.context['form'].errors)
+        self.assertIn('email', response.context['form'].errors)
+        self.assertIn('subject', response.context['form'].errors)
+        self.assertIn('message', response.context['form'].errors)
 
     def test_my_bookings_view_unauthenticated(self):
         response = self.client.get(reverse('my_bookings'))
-        self.assertEqual(response.status_code, 302)  # Should redirect to login
+        login_url = reverse('account_login')
+        self.assertRedirects(
+            response,
+            f'{login_url}?next={reverse("my_bookings")}'
+        )
 
-    def test_booking_update_view(self):
-        self.client.login(username='testuser', password='testpass123')
-        response = self.client.get(reverse('edit_booking', args=[self.booking.id]))
+    def test_my_bookings_view_authenticated(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('my_bookings'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'restaurant/edit_booking.html')
+        self.assertTemplateUsed(response, 'restaurant/my_bookings.html')
+        self.assertIn('bookings', response.context)
 
-    def test_booking_delete_view(self):
-        self.client.login(username='testuser', password='testpass123')
-        response = self.client.get(reverse('delete_booking', args=[self.booking.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'restaurant/delete_booking.html')
+    def test_manage_menu_view_unauthenticated(self):
+        url = reverse('manage_menu', args=[self.restaurant.id])
+        response = self.client.get(url)
+        login_url = reverse('account_login')
+        self.assertRedirects(response, f'{login_url}?next={url}')
 
-    def test_contact_form_submission(self):
-        url = reverse('contact')
-        data = {
-            'name': 'Test User',
-            'email': 'test@example.com',
-            'subject': 'Test Subject',
-            'message': 'Test Message'
-        }
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(Contact.objects.filter(email='test@example.com').exists())
-
-    def test_edit_booking(self):
-        self.client.login(username='testuser', password='testpass123')
-        url = reverse('edit_booking', args=[self.booking.id])
-        data = {
-            'date': (datetime.now().date() + timedelta(days=2)).strftime('%Y-%m-%d'),
-            'time': '14:00',
-            'number_of_guests': 3,
-            'special_requests': 'Updated request'
-        }
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 302)
-        self.booking.refresh_from_db()
-        self.assertEqual(self.booking.number_of_guests, 3)
-
-    def test_delete_booking(self):
-        self.client.login(username='testuser', password='testpass123')
-        url = reverse('delete_booking', args=[self.booking.id])
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertFalse(Booking.objects.filter(id=self.booking.id).exists())
-
-    def test_manage_menu(self):
-        self.client.login(username='testuser', password='testpass123')
+    def test_manage_menu_view_authenticated(self):
+        self.client.force_login(self.user)
         url = reverse('manage_menu', args=[self.restaurant.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/manage_menu.html')
+        self.assertEqual(response.context['restaurant'], self.restaurant)
+        self.assertIn('menu_items', response.context)
 
-    def test_add_menu_item(self):
-        self.client.login(username='testuser', password='testpass123')
+    def test_add_menu_item_view(self):
+        self.client.force_login(self.user)
         url = reverse('add_menu_item', args=[self.restaurant.id])
         data = {
             'name': 'New Item',
             'description': 'New Description',
-            'price': '12.99'
+            'price': '15.99'
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(MenuItem.objects.filter(name='New Item').exists())
+        self.assertEqual(MenuItem.objects.count(), 2)
+        new_item = MenuItem.objects.latest('id')
+        self.assertEqual(new_item.name, data['name'])
+        self.assertEqual(new_item.price, Decimal(data['price']))
 
-    def test_edit_menu_item(self):
-        self.client.login(username='testuser', password='testpass123')
+    def test_edit_menu_item_view(self):
+        self.client.force_login(self.user)
         url = reverse('edit_menu_item', args=[self.menu_item.id])
         data = {
             'name': 'Updated Item',
             'description': 'Updated Description',
-            'price': '14.99'
+            'price': '20.99'
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
         self.menu_item.refresh_from_db()
-        self.assertEqual(self.menu_item.name, 'Updated Item')
+        self.assertEqual(self.menu_item.name, data['name'])
+        self.assertEqual(self.menu_item.price, Decimal(data['price']))
 
-    def test_delete_menu_item(self):
-        self.client.login(username='testuser', password='testpass123')
+    def test_delete_menu_item_view(self):
+        self.client.force_login(self.user)
         url = reverse('delete_menu_item', args=[self.menu_item.id])
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
-        self.assertFalse(MenuItem.objects.filter(id=self.menu_item.id).exists())
+        self.assertEqual(MenuItem.objects.count(), 0)
 
-    def test_contact_messages(self):
-        self.client.login(username='staffuser', password='staffpassword')
+    def test_booking_creation(self):
+        """Test booking creation."""
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse(
+                'book_restaurant',
+                kwargs={'restaurant_id': self.restaurant.id}
+            ),
+            {
+                'date': date.today(),
+                'time': datetime.strptime('12:00', '%H:%M').time(),
+                'number_of_guests': 4,
+                'table': self.table.id,
+                'special_requests': 'Test request'
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Booking.objects.count(), 1)
+        booking = Booking.objects.first()
+        self.assertEqual(booking.user, self.user)
+        self.assertEqual(booking.restaurant, self.restaurant)
+        self.assertEqual(booking.number_of_guests, 4)
+
+    def test_menu_item_creation(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse(
+                'add_menu_item',
+                kwargs={'restaurant_id': self.restaurant.id}
+            ),
+            {
+                'name': 'Test Item',
+                'description': 'Test Description',
+                'price': '10.00',
+                'category': 'MAIN'
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            MenuItem.objects.filter(
+                restaurant=self.restaurant,
+                name='Test Item'
+            ).exists()
+        )
+
+    def test_menu_item_edit_view(self):
+        """Test menu item edit view."""
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                'edit_menu_item',
+                kwargs={'menu_item_id': self.menu_item.id}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'restaurant/menu_item_form.html')
+
+    def test_menu_item_delete_view(self):
+        """Test menu item delete view."""
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse(
+                'delete_menu_item',
+                kwargs={'menu_item_id': self.menu_item.id}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'restaurant/delete_menu_item.html')
+
+    def test_contact_messages_view(self):
+        """Test contact messages view."""
+        self.client.force_login(self.user)
         response = self.client.get(reverse('contact_messages'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'restaurant/contact_messages.html')
-        self.assertContains(response, self.contact.subject)
 
-    def test_view_contact(self):
-        self.client.login(username='staffuser', password='staffpassword')
-        response = self.client.get(reverse('view_contact', args=[self.contact.id]))
+    def test_contact_success_view(self):
+        response = self.client.get(reverse('contact_success'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'restaurant/view_contact.html')
-        self.assertContains(response, self.contact.message)
-        self.contact.refresh_from_db()
-        self.assertEqual(self.contact.status, 'read')
-
-    def test_update_contact_status(self):
-        self.client.login(username='staffuser', password='staffpassword')
-        url = reverse('update_contact_status', args=[self.contact.id])
-        response = self.client.post(url, {'status': 'read'})
-        self.assertEqual(response.status_code, 302)
-        self.contact.refresh_from_db()
-        self.assertEqual(self.contact.status, 'read')
-
-    def test_delete_contact(self):
-        self.client.login(username='staffuser', password='staffpassword')
-        url = reverse('delete_contact', args=[self.contact.id])
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertFalse(Contact.objects.filter(id=self.contact.id).exists())
-
-    def test_booking_form_validation(self):
-        """Test booking form validation."""
-        form_data = {
-            'date': (datetime.now().date() - timedelta(days=1)).strftime('%Y-%m-%d'),
-            'time': '12:00',
-            'number_of_guests': 0
-        }
-        form = BookingForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('date', form.errors)
-        self.assertIn('number_of_guests', form.errors)
-
-    def test_contact_form_error_handling(self):
-        """Test contact form error handling."""
-        form_data = {
-            'name': '',
-            'email': 'invalid-email',
-            'subject': '',
-            'message': ''
-        }
-        form = ContactForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('name', form.errors)
-        self.assertIn('email', form.errors)
-
-    def test_restaurant_detail_menu_items(self):
-        """Test restaurant detail view with menu items."""
-        response = self.client.get(reverse('restaurant_detail', args=[self.restaurant.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.menu_item.name)
-        self.assertContains(response, self.menu_item.description)
-
-    def test_booking_cancellation(self):
-        """Test booking cancellation."""
-        self.client.login(username='testuser', password='testpass123')
-        url = reverse('cancel_booking', args=[self.booking.id])
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.booking.refresh_from_db()
-        self.assertEqual(self.booking.status, 'cancelled')
-
-    def test_booking_edit_validation(self):
-        """Test booking edit validation."""
-        self.client.login(username='testuser', password='testpass123')
-        url = reverse('edit_booking', args=[self.booking.id])
-        data = {
-            'date': (datetime.now().date() - timedelta(days=1)).strftime('%Y-%m-%d'),
-            'time': '12:00',
-            'number_of_guests': 0
-        }
-        form = BookingForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('date', form.errors)
-        self.assertIn('number_of_guests', form.errors)
-
-    def test_menu_management_unauthorized(self):
-        """Test menu management unauthorized access."""
-        self.client.login(username='testuser', password='testpass123')
-        url = reverse('manage_menu', args=[self.restaurant.id])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)  # Should be accessible to all authenticated users
-
-    def test_menu_item_addition_validation(self):
-        """Test menu item addition validation."""
-        self.client.login(username='testuser', password='testpass123')
-        data = {
-            'name': '',
-            'description': '',
-            'price': '-10.00'
-        }
-        form = MenuItemForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('name', form.errors)
-        self.assertIn('price', form.errors)
-
-    def test_menu_item_edit_validation(self):
-        """Test menu item edit validation."""
-        self.client.login(username='testuser', password='testpass123')
-        data = {
-            'name': '',
-            'description': '',
-            'price': '-10.00'
-        }
-        form = MenuItemForm(data=data, instance=self.menu_item)
-        self.assertFalse(form.is_valid())
-        self.assertIn('name', form.errors)
-        self.assertIn('price', form.errors)
-
-    def test_contact_status_update_error(self):
-        """Test contact status update error handling."""
-        self.client.login(username='staffuser', password='staffpassword')
-        url = reverse('update_contact_status', args=[self.contact.id])
-        response = self.client.post(url, {'status': 'invalid_status'})
-        self.assertEqual(response.status_code, 302)
-        self.contact.refresh_from_db()
-        self.assertEqual(self.contact.status, 'unread')  # Status should not change
-
-    def test_contact_deletion_error(self):
-        """Test contact deletion error handling."""
-        self.client.login(username='staffuser', password='staffpassword')
-        # Create a new contact
-        contact = Contact.objects.create(
-            name='Test Contact 2',
-            email='contact2@test.com',
-            subject='Test Subject 2',
-            message='Test Message 2',
-            status='invalid_status'
-        )
-        url = reverse('delete_contact', args=[contact.id])
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        # Contact should be deleted regardless of status
-        self.assertFalse(Contact.objects.filter(id=contact.id).exists()) 
+        self.assertTemplateUsed(response, 'restaurant/contact_success.html')

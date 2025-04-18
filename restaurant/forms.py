@@ -1,9 +1,9 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Booking, Table, MenuItem, Contact
-from datetime import datetime, time, timedelta
+from .models import Booking, MenuItem, Contact
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 
 class UserRegistrationForm(UserCreationForm):
@@ -30,7 +30,10 @@ class BookingForm(forms.ModelForm):
     """Model form for creating/editing bookings."""
     class Meta:
         model = Booking
-        fields = ['date', 'time', 'number_of_guests', 'special_requests', 'table']
+        fields = [
+            'date', 'time', 'number_of_guests',
+            'special_requests', 'table', 'time_slot'
+        ]
 
         widgets = {
             'date': forms.DateInput(
@@ -84,38 +87,43 @@ class BookingForm(forms.ModelForm):
         if date is None:
             raise forms.ValidationError("Please select a date.")
         if date < timezone.now().date():
-            raise forms.ValidationError("You cannot book a table for a past date.")
+            raise forms.ValidationError(
+                "You cannot book a table for a past date."
+            )
         return date
 
     def clean_time(self):
         time = self.cleaned_data.get('time')
         if time is None:
             raise forms.ValidationError("Please select a time.")
-        opening_time = datetime.strptime('09:00', '%H:%M').time()
-        closing_time = datetime.strptime('22:00', '%H:%M').time()
+        opening_time = timezone.now().replace(hour=9, minute=0).time()
+        closing_time = timezone.now().replace(hour=22, minute=0).time()
         if time < opening_time:
-            raise forms.ValidationError(f"Booking time must be after {opening_time.strftime('%I:%M %p')}.")
+            raise forms.ValidationError(
+                "Booking time must be after 09:00."
+            )
         if time > closing_time:
-            raise forms.ValidationError(f"Booking time must be before {closing_time.strftime('%I:%M %p')}.")
+            raise forms.ValidationError(
+                "Booking time must be before 22:00."
+            )
         return time
 
     def clean_table(self):
         table = self.cleaned_data.get('table')
-        number_of_guests = self.cleaned_data.get('number_of_guests')
-        
-        if table is None:
-            raise forms.ValidationError("Please select a table.")
-        if number_of_guests and number_of_guests > table.capacity:
-            raise forms.ValidationError(
-                f"Selected table can only accommodate {table.capacity} guests. "
-                f"Please select a different table or reduce the number of guests."
+        num_guests = self.cleaned_data.get('number_of_guests')
+        if table and num_guests and num_guests > table.capacity:
+            raise ValidationError(
+                'Number of guests exceeds table capacity. '
+                'Please select a larger table.'
             )
         return table
 
     def clean_special_requests(self):
         special_requests = self.cleaned_data.get('special_requests', '')
         if len(special_requests) > 500:
-            raise forms.ValidationError("Special requests cannot exceed 500 characters.")
+            raise forms.ValidationError(
+                "Special requests cannot exceed 500 characters."
+            )
         return special_requests
 
 
@@ -152,7 +160,9 @@ class MenuItemForm(forms.ModelForm):
         if not name:
             raise forms.ValidationError("Menu item name is required.")
         if len(name) > 100:
-            raise forms.ValidationError("Menu item name cannot exceed 100 characters.")
+            raise ValidationError(
+                'Menu item name cannot exceed 100 characters.'
+            )
         return name
 
     def clean_description(self):
@@ -160,7 +170,9 @@ class MenuItemForm(forms.ModelForm):
         if not description:
             raise forms.ValidationError("Menu item description is required.")
         if len(description) > 500:
-            raise forms.ValidationError("Menu item description cannot exceed 500 characters.")
+            raise ValidationError(
+                'Menu item description cannot exceed 500 characters.'
+            )
         return description
 
     def clean_price(self):
@@ -212,12 +224,22 @@ class ContactForm(forms.ModelForm):
             raise forms.ValidationError("Name cannot exceed 100 characters.")
         return name
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email:
+            raise forms.ValidationError("Email is required.")
+        if '@' not in email or '.' not in email:
+            raise forms.ValidationError("Please enter a valid email address.")
+        return email
+
     def clean_subject(self):
         subject = self.cleaned_data.get('subject')
         if not subject:
             raise forms.ValidationError("Subject is required.")
         if len(subject) > 200:
-            raise forms.ValidationError("Subject cannot exceed 200 characters.")
+            raise forms.ValidationError(
+                "Subject cannot exceed 200 characters."
+            )
         return subject
 
     def clean_message(self):
@@ -225,5 +247,7 @@ class ContactForm(forms.ModelForm):
         if not message:
             raise forms.ValidationError("Message is required.")
         if len(message) > 1000:
-            raise forms.ValidationError("Message cannot exceed 1000 characters.")
+            raise ValidationError(
+                'Message cannot exceed 1000 characters.'
+            )
         return message
