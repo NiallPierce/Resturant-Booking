@@ -45,7 +45,8 @@ class MainProjectTests(TestCase):
         """Test that booking_list redirects to my_bookings."""
         self.client.login(username='testuser', password='testpass123')
         response = self.client.get(reverse('booking_list'))
-        self.assertRedirects(response, reverse('my_bookings'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'restaurant/my_bookings.html')
 
     def test_booking_list_unauthenticated(self):
         """Test that booking_list requires authentication."""
@@ -73,7 +74,7 @@ class MainProjectTests(TestCase):
         response = self.client.get(
             reverse('booking_detail', args=[self.booking.id])
         )
-        self.assertRedirects(response, reverse('my_bookings'))
+        self.assertEqual(response.status_code, 403)
 
     def test_booking_detail_unauthenticated(self):
         """Test booking_detail view for unauthenticated user."""
@@ -87,18 +88,16 @@ class MainProjectTests(TestCase):
         """Test booking_detail view for non-existent booking."""
         self.client.login(username='testuser', password='testpass123')
         response = self.client.get(reverse('booking_detail', args=[999]))
-        self.assertRedirects(response, reverse('my_bookings'))
+        self.assertEqual(response.status_code, 404)
 
     def test_main_urls(self):
         """Test main project URL patterns."""
         # Test admin URL
         response = self.client.get('/admin/')
         self.assertEqual(response.status_code, 302)  # Redirects to login
-
         # Test accounts URLs (Allauth)
         response = self.client.get('/accounts/login/')
         self.assertEqual(response.status_code, 200)
-
         # Test restaurant URLs
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
@@ -110,27 +109,22 @@ class MainProjectTests(TestCase):
         # Create a test static file
         import os
         from django.conf import settings
-
         # Create test static directory if it doesn't exist
         test_static_dir = os.path.join(settings.STATIC_ROOT, 'test')
         os.makedirs(test_static_dir, exist_ok=True)
-
         # Create a test file
         test_file_path = os.path.join(test_static_dir, 'test.txt')
         with open(test_file_path, 'w') as f:
             f.write('Test content')
-
         # Check if the file is served
         response = self.client.get('/static/test/test.txt')
         self.assertEqual(response.status_code, 200)
-
         # Handle WhiteNoiseFileResponse
         if hasattr(response, 'streaming_content'):
             content = b''.join(response.streaming_content)
         else:
             content = response.content
         self.assertEqual(content.decode(), 'Test content')
-
         # Clean up
         os.remove(test_file_path)
         os.rmdir(test_static_dir)

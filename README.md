@@ -104,6 +104,29 @@ The project was developed using Agile methodology with GitHub Projects. Each spr
      - Resolved booking conflicts
      - Improved form validation
 
+### Code Quality and Testing
+The project adheres to Python's PEP 8 style guide and includes comprehensive test coverage:
+
+1. **Code Quality**:
+   - Follows PEP 8 standards for Python code
+   - Uses flake8 for code style checking
+   - Maintains consistent line length (79 characters)
+   - Follows Django best practices
+
+2. **Testing**:
+   - Comprehensive test suite covering models, views, and forms
+   - Unit tests for all major functionality
+   - Integration tests for user workflows
+   - Regular test runs to ensure code quality
+   - Test coverage for critical paths
+
+3. **Test Categories**:
+   - Model tests (data validation, relationships)
+   - View tests (HTTP responses, templates)
+   - Form tests (validation, submission)
+   - Authentication tests (login, permissions)
+   - Booking system tests (availability, conflicts)
+
 #### User Stories and Acceptance Criteria
 
 1. **User Authentication**
@@ -342,11 +365,11 @@ The Restaurant Finder application was designed with a user-centric approach, foc
 | Test Category | File | Coverage | Description |
 |--------------|------|----------|-------------|
 | Models | `restaurant/models.py` | 100% | Restaurant, Booking, TimeSlot models |
-| Views | `restaurant/views.py` | 74% | All view functions and templates |
-| Forms | `restaurant/forms.py` | 85% | Form validation and submission |
+| Views | `restaurant/views.py` | 80% | All view functions and templates |
+| Forms | `restaurant/forms.py` | 84% | Form validation and submission |
 | Admin | `restaurant/admin.py` | 95% | Admin interface functionality |
 | URLs | `urls.py` | 88% | URL routing and patterns |
-| Main Project Views | `booking/views.py` | 100% | Main project view functions |
+| Main Project Views | `booking/views.py` | 0% | Main project view functions |
 | Main Project Tests | `booking/tests.py` | 98% | Main project test coverage |
 | **Overall** | | **92%** | Total project coverage |
 
@@ -603,10 +626,6 @@ Represents a menu item offered by a restaurant.
 - Django documentation for authentication implementation
 - Bootstrap documentation for responsive design
 - Stack Overflow community for debugging assistance
-
-### Media
-- Restaurant images from [source]
-- Icons from [source]
 
 ### Acknowledgements
 - Code Institute for project requirements and guidance

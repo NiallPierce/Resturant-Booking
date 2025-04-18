@@ -7,6 +7,8 @@ from decimal import Decimal
 from .forms import BookingForm
 from django.urls import reverse
 from django.core.exceptions import ValidationError
+import os
+from django.conf import settings
 
 
 class RestaurantModelTest(TestCase):
@@ -786,7 +788,6 @@ class ContactAdminViewTest(TestCase):
             response,
             '/accounts/login/?next=/contact/messages/'
         )
-
         contact_url = reverse(
             'view_contact',
             kwargs={'contact_id': self.contact.id}
@@ -797,3 +798,40 @@ class ContactAdminViewTest(TestCase):
             response,
             f'/accounts/login/?next=/contact/messages/{self.contact.id}/'
         )
+
+    def test_main_urls(self):
+        """Test main project URL patterns."""
+        # Test admin URL
+        response = self.client.get('/admin/')
+        self.assertEqual(response.status_code, 302)  # Redirects to login
+        # Test accounts URLs (Allauth)
+        response = self.client.get('/accounts/login/')
+        self.assertEqual(response.status_code, 200)
+        # Test restaurant URLs
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'restaurant/restaurant_list.html')
+
+    def test_static_files_in_development(self):
+        """Test static files serving in development mode."""
+        # This test assumes DEBUG=True in settings
+        # Create a test static file
+        # Create test static directory if it doesn't exist
+        test_static_dir = os.path.join(settings.STATIC_ROOT, 'test')
+        os.makedirs(test_static_dir, exist_ok=True)
+        # Create a test file
+        test_file_path = os.path.join(test_static_dir, 'test.txt')
+        with open(test_file_path, 'w') as f:
+            f.write('Test content')
+        # Check if the file is served
+        response = self.client.get('/static/test/test.txt')
+        self.assertEqual(response.status_code, 200)
+        # Handle WhiteNoiseFileResponse
+        if hasattr(response, 'streaming_content'):
+            content = b''.join(response.streaming_content)
+        else:
+            content = response.content
+        self.assertEqual(content.decode(), 'Test content')
+        # Clean up
+        os.remove(test_file_path)
+        os.rmdir(test_static_dir)
