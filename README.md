@@ -34,6 +34,14 @@ This project uses Git for version control and GitHub for repository hosting. The
    - `development`: Current development
    - Feature branches for new functionality
 
+### Code Quality
+The project maintains high code quality through:
+- HTML validation using htmlhint
+- CSS linting with stylelint
+- Consistent code formatting
+- Proper selector specificity
+- Standardized naming conventions
+
 ### Agile Methodology
 The project was developed using Agile methodology with GitHub Projects. Each sprint was carefully planned and executed to deliver incremental value:
 
@@ -626,6 +634,7 @@ Represents a menu item offered by a restaurant.
 - Django documentation for authentication implementation
 - Bootstrap documentation for responsive design
 - Stack Overflow community for debugging assistance
+
 
 ### Acknowledgements
 - Code Institute for project requirements and guidance

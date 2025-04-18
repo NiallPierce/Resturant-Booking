@@ -1,103 +1,109 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block content %}
+{% extends "base.html" %} {% load static %} {% block content %}
 <div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card animate-fade-in">
-                <div class="card-body">
-                    <h2 class="card-title text-center mb-4">Contact Us</h2>
-                    
-                    {% if messages %}
-                    <div class="messages">
-                        {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card animate-fade-in">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-4">Contact Us</h2>
 
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        
-                        {% for field in form %}
-                        <div class="mb-4">
-                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.help_text %}
-                            <div class="form-text">{{ field.help_text }}</div>
-                            {% endif %}
-                            {% if field.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in field.errors %}
-                                {{ error }}
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-paper-plane"></i> Send Message
-                            </button>
-                        </div>
-                    </form>
-                </div>
+          {% if messages %}
+          <div class="messages">
+            {% for message in messages %}
+            <div
+              class="alert alert-{{ message.tags }} alert-dismissible fade show"
+              role="alert"
+            >
+              {{ message }}
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
             </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %} {% for field in form %}
+            <div class="mb-4">
+              <label for="{{ field.id_for_label }}" class="form-label"
+                >{{ field.label }}</label
+              >
+              {{ field }} {% if field.help_text %}
+              <div class="form-text">{{ field.help_text }}</div>
+              {% endif %} {% if field.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in field.errors %} {{ error }} {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-paper-plane"></i> Send Message
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Contact Information Section -->
 <div class="container py-5">
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-map-marker-alt fa-3x mb-3 text-primary"></i>
-                    <h5 class="card-title">Our Location</h5>
-                    <p class="card-text">123 Restaurant Street<br>Food City, FC 12345</p>
-                </div>
-            </div>
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <i class="fas fa-map-marker-alt fa-3x mb-3 text-primary"></i>
+          <h5 class="card-title">Our Location</h5>
+          <p class="card-text">
+            123 Restaurant Street<br />Food City, FC 12345
+          </p>
         </div>
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-phone fa-3x mb-3 text-primary"></i>
-                    <h5 class="card-title">Phone</h5>
-                    <p class="card-text">+1 (555) 123-4567<br>Mon-Fri: 9am-5pm</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-envelope fa-3x mb-3 text-primary"></i>
-                    <h5 class="card-title">Email</h5>
-                    <p class="card-text">info@restaurant.com<br>support@restaurant.com</p>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <i class="fas fa-phone fa-3x mb-3 text-primary"></i>
+          <h5 class="card-title">Phone</h5>
+          <p class="card-text">+1 (555) 123-4567<br />Mon-Fri: 9am-5pm</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <i class="fas fa-envelope fa-3x mb-3 text-primary"></i>
+          <h5 class="card-title">Email</h5>
+          <p class="card-text">
+            info@restaurant.com<br />support@restaurant.com
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Map Section -->
 <div class="container-fluid px-0">
-    <div class="map-container" style="height: 400px;">
-        <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.21501812593!2d-73.987844924164!3d40.757978971389!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25855c6480299%3A0x55194ec5a1ae072e!2sTimes%20Square!5e0!3m2!1sen!2sus!4v1681234567890!5m2!1sen!2sus" 
-            width="100%" 
-            height="100%" 
-            style="border:0;" 
-            allowfullscreen="" 
-            loading="lazy" 
-            referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
-    </div>
+  <div class="map-container" style="height: 400px">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.21501812593!2d-73.987844924164!3d40.757978971389!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25855c6480299%3A0x55194ec5a1ae072e!2sTimes%20Square!5e0!3m2!1sen!2sus!4v1681234567890!5m2!1sen!2sus"
+      width="100%"
+      height="100%"
+      style="border: 0"
+      allowfullscreen=""
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+    >
+    </iframe>
+  </div>
 </div>
 
-{% endblock %} 
+{% endblock %}

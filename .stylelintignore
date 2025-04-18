@@ -1,0 +1,7 @@
+node_modules/
+coverage/
+static/admin/
+staticfiles/
+*.min.css
+**/vendor/**
+**/select2/** 
