@@ -113,11 +113,20 @@ class BookingModelTest(TestCase):
 
     def test_booking_form_validation(self):
         """Test booking form validation"""
+        # Create a table for testing
+        table = Table.objects.create(
+            restaurant=self.restaurant,
+            table_number=1,
+            capacity=4,
+            is_active=True
+        )
+        
         form_data = {
             'date': timezone.now().date() + timedelta(days=1),
             'time': datetime.strptime('12:00', '%H:%M').time(),
             'number_of_guests': 4,
-            'special_requests': 'Test request'
+            'special_requests': 'Test request',
+            'table': table.id
         }
         
         # Test valid form
@@ -143,6 +152,11 @@ class BookingModelTest(TestCase):
         self.assertIn('date', form.errors)
         
         # Test invalid time
+        form_data['date'] = timezone.now().date() + timedelta(days=1)
+        form_data['time'] = datetime.strptime('23:00', '%H:%M').time()
+        form = BookingForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('time', form.errors)
 
 
 class MenuItemModelTest(TestCase):
