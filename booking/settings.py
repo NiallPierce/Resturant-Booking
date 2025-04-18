@@ -1,51 +1,22 @@
-"""
-Django settings for booking project.
-"""
 import os
 from pathlib import Path
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-import dj_database_url
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
-# Database configuration
-if os.getenv('DATABASE_URL'):
-    DATABASES = {
-        'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
+ALLOWED_HOSTS = ['*']
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-for-development')
-
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
-
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    'restaurantbookingp4.herokuapp.com',
-    'restaurantbookingp4-c41e1049427c.herokuapp.com',
-    '.herokuapp.com',
-    '8000-niallpierce-resturantbo-3oqzgbm7qmm.ws-us118.gitpod.io',
-    '8000-niallpierce-resturantbo-fq36i4m1aol.ws-us118.gitpod.io',
-    '.gitpod.io',
-]
-
+# CSRF Settings
 CSRF_TRUSTED_ORIGINS = [
-    'https://restaurantbookingp4.herokuapp.com',
-    'https://restaurantbookingp4-c41e1049427c.herokuapp.com',
-    'https://8000-niallpierce-resturantbo-3oqzgbm7qmm.ws-us118.gitpod.io',
-    'https://8000-niallpierce-resturantbo-fq36i4m1aol.ws-us118.gitpod.io',
+    'https://*.gitpod.io',
+    'https://8000-niallpierce-resturantbo-egyx05v8wrq.ws-us118.gitpod.io',
+    'https://*.ws-us118.gitpod.io'
 ]
 
 # Application definition
@@ -61,6 +32,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'restaurant',
+    'booking',
 ]
 
 MIDDLEWARE = [
@@ -75,14 +47,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-ROOT_URLCONF = 'booking.urls'
-
-SITE_ID = 1
-LOGIN_REDIRECT_URL = '/'  # Where to redirect after successful login
-LOGIN_URL = '/accounts/login/'  # Where to redirect for login
-LOGOUT_REDIRECT_URL = '/'
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -100,7 +65,15 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'booking.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
+
+# Database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -118,19 +91,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# django-allauth settings
-ACCOUNT_EMAIL_VERIFICATION = 'none'
-ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
-ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
-ACCOUNT_LOGOUT_ON_GET = True
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
-ACCOUNT_SESSION_REMEMBER = None
-ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
-ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_MESSAGE_LEVEL = 0  # This will prevent messages from being added to the message framework
-
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -138,10 +98,33 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SITE_ID = 1
+
+# Allauth settings
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
+ACCOUNT_USERNAME_MIN_LENGTH = 4
+LOGIN_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/' 

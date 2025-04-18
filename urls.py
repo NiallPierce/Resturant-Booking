@@ -1,13 +1,14 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.urls import get_resolver
-
-print("=== Registered URLs ===")
-print(get_resolver().url_patterns)
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),  # For authentication URLs
-    path('', include('restaurants.urls')),  # Include restaurant URLs
-    path('bookings/', include('booking.urls')),  # Include booking URLs
+    path('accounts/', include('allauth.urls')),  # For Allauth URLs
+    path('', include('restaurant.urls')),  # Include restaurant URLs
 ]
+
+# Serve static files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

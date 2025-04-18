@@ -32,5 +32,4 @@ urlpatterns = [
         name='delete_booking'
     ),
     path('contact/', views.contact, name='contact'),
-    path('logout/', views.logout_view, name='logout'),
 ]

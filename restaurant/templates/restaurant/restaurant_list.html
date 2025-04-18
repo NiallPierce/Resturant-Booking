@@ -1,114 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurants</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Optional: Add Font Awesome for icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-utensils me-2"></i>
-                Restaurant Finder
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'restaurant_list' %}">Restaurants</a>
-                    </li>
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'my_bookings' %}">My Bookings</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_login' %}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
-                        </li>
-                    {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'contact' %}">Contact</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="container my-5">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <!-- Header Section -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h1 class="card-title text-center mb-4">Restaurant List</h1>
-                        <div class="alert alert-info">
-                            Welcome to our restaurant listing! Find your perfect dining spot.
-                        </div>
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Header Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">Restaurant List</h1>
+                    <div class="alert alert-info">
+                        Welcome to our restaurant listing! Find your perfect dining spot.
                     </div>
                 </div>
+            </div>
 
-                <!-- Restaurant Listings -->
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h2 class="card-title h4 mb-4">Available Restaurants</h2>
-                        <div class="list-group">
-                            {% for restaurant in restaurants %}
-                            <!-- START LOOP HERE -->
-                            <div class="list-group-item list-group-item-action">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h5 class="mb-1">{{ restaurant.name }}</h5>
-                                    <small class="text-muted">
-                                        <i class="fas fa-star text-warning"></i> {{ restaurant.rating }}
-                                    </small>
-                                </div>
-                                <p class="mb-1">{{ restaurant.address }}</p>
+            <!-- Restaurant Listings -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title h4 mb-4">Available Restaurants</h2>
+                    <div class="list-group">
+                        {% for restaurant in restaurants %}
+                        <!-- START LOOP HERE -->
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ restaurant.name }}</h5>
                                 <small class="text-muted">
-                                    <i class="fas fa-clock me-1"></i> Open: 9:00 AM - 10:00 PM
+                                    <i class="fas fa-star text-warning"></i> {{ restaurant.rating }}
                                 </small>
-                                <div class="mt-2">
-                                    <a href="{% url 'book_restaurant' restaurant.id %}" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-calendar-alt me-1"></i> Book Now
-                                    </a>
-                                    <a href="{% url 'restaurant_detail' restaurant.id %}" class="btn btn-outline-secondary btn-sm ms-2">
-                                        <i class="fas fa-info-circle me-1"></i> More Info
-                                    </a>
-                                </div>
                             </div>
-                            {% endfor %}
-                            <!-- END LOOP HERE -->
+                            <p class="mb-1">{{ restaurant.address }}</p>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i> Open: 9:00 AM - 10:00 PM
+                            </small>
+                            <div class="mt-2">
+                                <a href="{% url 'book_restaurant' restaurant.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-calendar-alt me-1"></i> Book Now
+                                </a>
+                                <a href="{% url 'restaurant_detail' restaurant.id %}" class="btn btn-outline-secondary btn-sm ms-2">
+                                    <i class="fas fa-info-circle me-1"></i> More Info
+                                </a>
+                            </div>
                         </div>
+                        {% endfor %}
+                        <!-- END LOOP HERE -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="bg-light py-4 mt-5">
-        <div class="container text-center">
-            <p class="text-muted mb-0">© 2025 Restaurant Finder. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <!-- Bootstrap and Popper JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html>
+</div>
+{% endblock %}
