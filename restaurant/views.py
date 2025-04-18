@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib import messages
-from .models import Restaurant, MenuItem, Booking
+from .models import Restaurant, MenuItem, Booking, Contact
 from django import forms
-from .forms import UserRegistrationForm, BookingForm
+from .forms import UserRegistrationForm, BookingForm, MenuItemForm, ContactForm
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from datetime import date
@@ -74,11 +74,39 @@ def restaurant_list(request):
 
 
 def contact(request):
-    restaurants = Restaurant.objects.all()
+    """View for submitting contact form."""
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            try:
+                contact = form.save()
+                messages.success(
+                    request,
+                    'Thank you for your message! We will get back to you soon.'
+                )
+                return redirect('restaurant_list')
+            except Exception as e:
+                messages.error(
+                    request,
+                    'An error occurred while submitting your message. '
+                    'Please try again later.'
+                )
+                print(f"Contact submission error: {str(e)}")
+        else:
+            messages.error(
+                request,
+                'Please correct the errors in the form below.'
+            )
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.title()}: {error}")
+    else:
+        form = ContactForm()
+    
     return render(
         request,
         'restaurant/contact.html',
-        {'restaurants': restaurants}
+        {'form': form}
     )
 
 
@@ -97,11 +125,36 @@ def my_bookings(request):
 @login_required
 def cancel_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
-    if booking.status != 'cancelled':
-        booking.status = 'cancelled'
-        booking.save()
-        messages.success(request, 'Your booking has been cancelled.')
-    return redirect('my_bookings')
+    
+    if booking.status == 'cancelled':
+        messages.warning(
+            request,
+            'This booking has already been cancelled.'
+        )
+        return redirect('my_bookings')
+    
+    if request.method == 'POST':
+        try:
+            booking.status = 'cancelled'
+            booking.save()
+            messages.success(
+                request,
+                'Your booking has been cancelled successfully.'
+            )
+        except Exception as e:
+            messages.error(
+                request,
+                'An error occurred while cancelling your booking. '
+                'Please try again later.'
+            )
+            print(f"Booking cancellation error: {str(e)}")
+        return redirect('my_bookings')
+    
+    return render(
+        request,
+        'restaurant/cancel_booking.html',
+        {'booking': booking}
+    )
 
 
 def logout_view(request):
@@ -151,27 +204,174 @@ def book_restaurant(request, restaurant_id):
     print(f"Processing booking for restaurant: {restaurant.name}")
 
     if request.method == 'POST':
-        print("Processing POST request with booking data")
         form = BookingForm(request.POST)
         if form.is_valid():
-            print("Form is valid - creating booking")
-            booking = form.save(commit=False)
-            booking.user = request.user
-            booking.restaurant = restaurant
-            booking.save()
-            print(f"Booking created for user: {request.user.username}")
-            return redirect('restaurant_list')
+            try:
+                booking = form.save(commit=False)
+                booking.user = request.user
+                booking.restaurant = restaurant
+                booking.status = 'pending'
+                booking.save()
+                messages.success(
+                    request,
+                    'Your booking has been submitted successfully! '
+                    'We will confirm your reservation shortly.'
+                )
+                return redirect('my_bookings')
+            except Exception as e:
+                messages.error(
+                    request,
+                    'An error occurred while processing your booking. '
+                    'Please try again later.'
+                )
+                print(f"Booking error: {str(e)}")
         else:
-            print("Form validation failed")
-            print(f"Form errors: {form.errors}")
+            messages.error(
+                request,
+                'Please correct the errors in the form below.'
+            )
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.title()}: {error}")
     else:
-        print("Displaying empty booking form")
         form = BookingForm()
+        print("Displaying empty booking form")
 
     print("=== End Debug ===\n")
     return render(
         request,
         'restaurant/booking_form.html',
+        {'form': form, 'restaurant': restaurant}
+    )
+
+
+@login_required
+def edit_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    
+    if booking.status == 'cancelled':
+        messages.error(
+            request,
+            'Cannot edit a cancelled booking. Please create a new booking instead.'
+        )
+        return redirect('my_bookings')
+    
+    if request.method == 'POST':
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            try:
+                updated_booking = form.save()
+                messages.success(
+                    request,
+                    'Your booking has been updated successfully!'
+                )
+                return redirect('my_bookings')
+            except Exception as e:
+                messages.error(
+                    request,
+                    'An error occurred while updating your booking. '
+                    'Please try again later.'
+                )
+                print(f"Booking update error: {str(e)}")
+        else:
+            messages.error(
+                request,
+                'Please correct the errors in the form below.'
+            )
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.title()}: {error}")
+    else:
+        form = BookingForm(instance=booking)
+    
+    return render(
+        request,
+        'restaurant/edit_booking.html',
+        {'form': form, 'booking': booking}
+    )
+
+
+@login_required
+def delete_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    
+    if request.method == 'POST':
+        try:
+            booking.delete()
+            messages.success(
+                request,
+                'Your booking has been deleted successfully.'
+            )
+        except Exception as e:
+            messages.error(
+                request,
+                'An error occurred while deleting your booking. '
+                'Please try again later.'
+            )
+            print(f"Booking deletion error: {str(e)}")
+        return redirect('my_bookings')
+    
+    return render(
+        request,
+        'restaurant/delete_booking.html',
+        {'booking': booking}
+    )
+
+
+@login_required
+def manage_menu(request, restaurant_id):
+    """View for managing restaurant menu items."""
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+    menu_items = MenuItem.objects.filter(restaurant=restaurant)
+    
+    return render(
+        request,
+        'restaurant/manage_menu.html',
+        {
+            'restaurant': restaurant,
+            'menu_items': menu_items
+        }
+    )
+
+
+@login_required
+def add_menu_item(request, restaurant_id):
+    """View for adding a new menu item."""
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+    
+    if request.method == 'POST':
+        form = MenuItemForm(request.POST)
+        if form.is_valid():
+            try:
+                menu_item = form.save(commit=False)
+                menu_item.restaurant = restaurant
+                menu_item.save()
+                messages.success(
+                    request,
+                    'Menu item added successfully!'
+                )
+                return redirect('manage_menu', restaurant_id=restaurant.id)
+            except Exception as e:
+                messages.error(
+                    request,
+                    'An error occurred while adding the menu item. '
+                    'Please try again later.'
+                )
+                print(f"Menu item addition error: {str(e)}")
+        else:
+            messages.error(
+                request,
+                'Please correct the errors in the form below.'
+            )
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.title()}: {error}")
+    else:
+        form = MenuItemForm()
+    
+    return render(
+        request,
+        'restaurant/add_menu_item.html',
         {
             'form': form,
             'restaurant': restaurant
@@ -180,65 +380,185 @@ def book_restaurant(request, restaurant_id):
 
 
 @login_required
-def edit_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
-
-    # Only allow editing if booking is not cancelled
-    if booking.status == 'cancelled':
-        messages.error(request, 'Cancelled bookings cannot be edited.')
-        return redirect('my_bookings')
-
+def edit_menu_item(request, menu_item_id):
+    """View for editing an existing menu item."""
+    menu_item = get_object_or_404(MenuItem, id=menu_item_id)
+    
     if request.method == 'POST':
-        form = BookingForm(request.POST, instance=booking)
+        form = MenuItemForm(request.POST, instance=menu_item)
         if form.is_valid():
-            # Only update if the new date is not in the past
-            if form.cleaned_data['date'] < date.today():
+            try:
+                form.save()
+                messages.success(
+                    request,
+                    'Menu item updated successfully!'
+                )
+                return redirect('manage_menu', restaurant_id=menu_item.restaurant.id)
+            except Exception as e:
                 messages.error(
                     request,
-                    'You cannot select a date in the past.'
+                    'An error occurred while updating the menu item. '
+                    'Please try again later.'
                 )
-                return render(
-                    request,
-                    'restaurant/edit_booking.html',
-                    {
-                        'form': form,
-                        'booking': booking
-                    }
-                )
-
-            form.save()
-            messages.success(
+                print(f"Menu item update error: {str(e)}")
+        else:
+            messages.error(
                 request,
-                'Your booking has been updated successfully.'
+                'Please correct the errors in the form below.'
             )
-            return redirect('my_bookings')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.title()}: {error}")
     else:
-        form = BookingForm(instance=booking)
-
+        form = MenuItemForm(instance=menu_item)
+    
     return render(
         request,
-        'restaurant/edit_booking.html',
+        'restaurant/edit_menu_item.html',
         {
             'form': form,
-            'booking': booking
+            'menu_item': menu_item
         }
     )
 
 
 @login_required
-def delete_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
-
+def delete_menu_item(request, menu_item_id):
+    """View for deleting a menu item."""
+    menu_item = get_object_or_404(MenuItem, id=menu_item_id)
+    restaurant_id = menu_item.restaurant.id
+    
     if request.method == 'POST':
-        booking.delete()
-        messages.success(
-            request,
-            'Your booking has been deleted successfully.'
-        )
-        return redirect('my_bookings')
-
+        try:
+            menu_item.delete()
+            messages.success(
+                request,
+                'Menu item deleted successfully!'
+            )
+        except Exception as e:
+            messages.error(
+                request,
+                'An error occurred while deleting the menu item. '
+                'Please try again later.'
+            )
+            print(f"Menu item deletion error: {str(e)}")
+        return redirect('manage_menu', restaurant_id=restaurant_id)
+    
     return render(
         request,
-        'restaurant/delete_booking.html',
-        {'booking': booking}
+        'restaurant/delete_menu_item.html',
+        {'menu_item': menu_item}
+    )
+
+
+@login_required
+def contact_messages(request):
+    """View for admin to manage contact messages."""
+    if not request.user.is_staff:
+        messages.error(
+            request,
+            'You do not have permission to view contact messages.'
+        )
+        return redirect('restaurant_list')
+    
+    contacts = Contact.objects.all().order_by('-created_at')
+    return render(
+        request,
+        'restaurant/contact_messages.html',
+        {'contacts': contacts}
+    )
+
+
+@login_required
+def view_contact(request, contact_id):
+    """View for admin to view a specific contact message."""
+    if not request.user.is_staff:
+        messages.error(
+            request,
+            'You do not have permission to view contact messages.'
+        )
+        return redirect('restaurant_list')
+    
+    contact = get_object_or_404(Contact, id=contact_id)
+    if contact.status == 'unread':
+        contact.status = 'read'
+        contact.save()
+    
+    return render(
+        request,
+        'restaurant/view_contact.html',
+        {'contact': contact}
+    )
+
+
+@login_required
+def update_contact_status(request, contact_id):
+    """View for admin to update contact message status."""
+    if not request.user.is_staff:
+        messages.error(
+            request,
+            'You do not have permission to update contact messages.'
+        )
+        return redirect('restaurant_list')
+    
+    contact = get_object_or_404(Contact, id=contact_id)
+    
+    if request.method == 'POST':
+        try:
+            new_status = request.POST.get('status')
+            if new_status in dict(Contact.STATUS_CHOICES):
+                contact.status = new_status
+                contact.save()
+                messages.success(
+                    request,
+                    'Contact message status updated successfully!'
+                )
+            else:
+                messages.error(
+                    request,
+                    'Invalid status selected.'
+                )
+        except Exception as e:
+            messages.error(
+                request,
+                'An error occurred while updating the status. '
+                'Please try again later.'
+            )
+            print(f"Contact status update error: {str(e)}")
+    
+    return redirect('view_contact', contact_id=contact_id)
+
+
+@login_required
+def delete_contact(request, contact_id):
+    """View for admin to delete a contact message."""
+    if not request.user.is_staff:
+        messages.error(
+            request,
+            'You do not have permission to delete contact messages.'
+        )
+        return redirect('restaurant_list')
+    
+    contact = get_object_or_404(Contact, id=contact_id)
+    
+    if request.method == 'POST':
+        try:
+            contact.delete()
+            messages.success(
+                request,
+                'Contact message deleted successfully!'
+            )
+        except Exception as e:
+            messages.error(
+                request,
+                'An error occurred while deleting the message. '
+                'Please try again later.'
+            )
+            print(f"Contact deletion error: {str(e)}")
+        return redirect('contact_messages')
+    
+    return render(
+        request,
+        'restaurant/delete_contact.html',
+        {'contact': contact}
     )

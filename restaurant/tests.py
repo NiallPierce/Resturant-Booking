@@ -2,8 +2,9 @@ from django.test import TestCase
 from .models import Restaurant, TimeSlot, Booking, MenuItem, Table
 from django.contrib.auth.models import User
 from django.utils import timezone
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
+from .forms import BookingForm
 
 
 class RestaurantModelTest(TestCase):
@@ -109,6 +110,39 @@ class BookingModelTest(TestCase):
         self.assertEqual(self.booking.number_of_guests, 2)
         self.assertEqual(self.booking.special_requests, "None")
         self.assertEqual(self.booking.status, "pending")
+
+    def test_booking_form_validation(self):
+        """Test booking form validation"""
+        form_data = {
+            'date': timezone.now().date() + timedelta(days=1),
+            'time': datetime.strptime('12:00', '%H:%M').time(),
+            'number_of_guests': 4,
+            'special_requests': 'Test request'
+        }
+        
+        # Test valid form
+        form = BookingForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        
+        # Test invalid number of guests
+        form_data['number_of_guests'] = 0
+        form = BookingForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('number_of_guests', form.errors)
+        
+        form_data['number_of_guests'] = 9
+        form = BookingForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('number_of_guests', form.errors)
+        
+        # Test past date
+        form_data['number_of_guests'] = 4
+        form_data['date'] = timezone.now().date() - timedelta(days=1)
+        form = BookingForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('date', form.errors)
+        
+        # Test invalid time
 
 
 class MenuItemModelTest(TestCase):
